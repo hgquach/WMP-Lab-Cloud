@@ -12,7 +12,6 @@ public class TouchInput : MonoBehaviour {
 	{
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen").GetComponent<BoxCollider2D>();
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen").GetComponent<BoxCollider2D>();
-		gamestate = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameState> ();
 	}
 	void Start () 
 	{
@@ -28,12 +27,12 @@ public class TouchInput : MonoBehaviour {
 			Vector3 pos = Camera.main.ScreenToWorldPoint (Input.GetTouch (0).position);
 			if (rightScreen.bounds.Contains (pos)) {
 				Debug.Log ("inside right");
-				// gamestate.choice = 1;
+				 GameState.choice = 1;
 			}
 
 			if (leftScreen.bounds.Contains (pos)) {
 				Debug.Log ("inside left");
-				// gamestate.choice = 2;
+				GameState.choice = 2;
 			}
 //			Debug.Log ("touch world pos.x " + pos.x);
 //			Debug.Log ("touch world pos.y "+ pos.y);
