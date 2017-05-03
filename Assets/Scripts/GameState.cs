@@ -1,29 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor.SceneManagement;
 
 public class GameState : MonoBehaviour {
 	public static int currentLevel = 1;
-	public static int choice;
-	public static int correctAnswer;
-	public static bool setResult;
+	public static int choice = 0;
+	public static int correctAnswer = 1;
+	public static bool setResult = false;
 	// Use this for initialization
-	void Start () 
-	{
-		correctAnswer = 1;
-		choice = 1;
-		setResult = false;
-	}
-	
+
 	// Update is called once per frame
 	void Update () 
 	{
-		if (isCorrectAnswer (choice, correctAnswer)) {
+		//Debug.Log ("correct Answer: " + correctAnswer + " user choice: " + choice);
+		print("player choose: "+choice);
+		bool correctAns = isCorrectAnswer (choice, correctAnswer);
+		print ("correct answer: " + correctAns);
+		if (correctAns) 
+		{
 			setResult = true;
-		} else {
+		} 
+		else 
+		{
 			setResult = false;
 		}
-		
+
+		print ("setREsult: " + setResult);
 		
 	}
 
@@ -37,12 +40,36 @@ public class GameState : MonoBehaviour {
 		return currentLevel;
 	}
 
-	static public bool isCorrectAnswer(int userChoice , int correctAns)
+	static private bool isCorrectAnswer(int userChoice , int correctAns)
 	{
+		//Debug.Log ("isCorrectAnswerDebug: "+ (userChoice == correctAns));
 		if (userChoice == correctAns) {
 			return true;
-		}
-		else 
+		} else { 
 			return false;
+		}
+	}
+
+	public  IEnumerator waitAndTransistion()
+	{
+		yield return new WaitForSeconds(1);
+		if (EditorSceneManager.GetActiveScene ().buildIndex == 2) {
+			EditorSceneManager.LoadScene (0);	
+		} else {
+			EditorSceneManager.LoadScene (EditorSceneManager.GetActiveScene ().buildIndex + 1);
+		}
+			//print ("waitAndTransistion" + Time.time);
+	}
+
+	public void transistionStart(bool isNextLevel = false)
+	{
+		//print("starting "+Time.time);
+		if (isNextLevel) {
+			incCurrentLevel ();
+			StartCoroutine (waitAndTransistion ());
+		} else {
+			StartCoroutine (waitAndTransistion ());
+		}
+		//print("done"+Time.time);
 	}
 }
