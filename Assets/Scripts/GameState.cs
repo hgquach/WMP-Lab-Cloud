@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 public class GameState : MonoBehaviour {
-	public static int currentLevel = 1;
+	public static int currentLevel = 0;
 	public static int choice = 0;
 	public static int correctAnswer = 1;
 	public static bool setResult = false;
@@ -53,10 +53,10 @@ public class GameState : MonoBehaviour {
 	public  IEnumerator waitAndTransistion()
 	{
 		yield return new WaitForSeconds(1);
-		if (EditorSceneManager.GetActiveScene ().buildIndex == 2) {
-			EditorSceneManager.LoadScene (0);	
+		if (SceneManager.GetActiveScene ().buildIndex == 3) {
+			SceneManager.LoadScene (1);	
 		} else {
-			EditorSceneManager.LoadScene (EditorSceneManager.GetActiveScene ().buildIndex + 1);
+			SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex + 1);
 		}
 			//print ("waitAndTransistion" + Time.time);
 	}
@@ -65,7 +65,6 @@ public class GameState : MonoBehaviour {
 	{
 		//print("starting "+Time.time);
 		if (isNextLevel) {
-			incCurrentLevel ();
 			StartCoroutine (waitAndTransistion ());
 		} else {
 			StartCoroutine (waitAndTransistion ());

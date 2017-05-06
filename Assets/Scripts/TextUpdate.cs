@@ -16,6 +16,7 @@ public class TextUpdate : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
 	{
+		GameState.incCurrentLevel ();
 		textMesh.text = baseText + GameState.getCurrentLevel();
       
 	}
