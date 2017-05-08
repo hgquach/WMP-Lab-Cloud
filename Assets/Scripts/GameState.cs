@@ -8,25 +8,15 @@ public class GameState : MonoBehaviour {
 	public static int choice = 0;
 	public static int correctAnswer = 1;
 	public static bool setResult = false;
+	public static Level[] levelArray; 
 	// Use this for initialization
-
+	void start()
+	{
+		levelArray[0] = new Level("Test", new RatioStruct(1,2) , 50 , Color.blue , 10 );
+	}
 	// Update is called once per frame
 	void Update () 
 	{
-		//Debug.Log ("correct Answer: " + correctAnswer + " user choice: " + choice);
-		print("player choose: "+choice);
-		bool correctAns = isCorrectAnswer (choice, correctAnswer);
-		print ("correct answer: " + correctAns);
-		if (correctAns) 
-		{
-			setResult = true;
-		} 
-		else 
-		{
-			setResult = false;
-		}
-
-		print ("setREsult: " + setResult);
 		
 	}
 
@@ -44,8 +34,10 @@ public class GameState : MonoBehaviour {
 	{
 		//Debug.Log ("isCorrectAnswerDebug: "+ (userChoice == correctAns));
 		if (userChoice == correctAns) {
+			setResult = true;
 			return true;
 		} else { 
+			setResult = false;
 			return false;
 		}
 	}

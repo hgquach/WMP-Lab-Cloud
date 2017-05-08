@@ -2,17 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GPManager : MonoBehaviour {
+public class SessionManager: MonoBehaviour {
 
-	// Use this for initialization
+    // holding left and right side information
 	GameObject leftScreen;
 	GameObject rightScreen;
 	Transform leftContainer; 
 	Transform rightContainer;
-
 	Vector2 leftSidePos;
 	Vector2 rightSidePos;
-	enum Sides {Right,Left};
+
+	// used to make targeting left and right side easier
+	public enum Sides {Right,Left,Null};
+
+	// use to determine the user choice and correct choice
+	// might change userChoice to private 2 lazy to create setter rn
+	public Sides userChoice; 
+	private Sides CorrectAnswer;
+
+	// max session amount before moving onto another round 
+	int sessionMax; 
 	void Awake()
 	{
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
@@ -23,24 +32,27 @@ public class GPManager : MonoBehaviour {
 
 		leftContainer = leftScreen.transform.GetChild (0);
 		rightContainer = rightScreen.transform.GetChild (0);
+		sessionMax = 10;
+		userChoice = Sides.Null;
 	}
 
 	void Start () 
 	{
 		
-		spawnLocation("WhiteDot",50,Color.white,Sides.Left);
-		spawnLocation("WhiteDot",50,Color.blue,Sides.Right);
-		
 	}
 
-	void LateUpdate()
+	void Update()
 	{
-		_clearDot (leftContainer.gameObject, rightContainer.gameObject);
+		Debug.Log (userChoice);
 	}
+
+
 
 	// need to create some enumerations to make cleaner code
 	// might need to create some sort of switch case to determine: which object to spawn and which shape to spawn the object in 
 	// ignoring what shape the object should spawn in 
+
+
 	void spawnLocation(string obj, int amount , Color objectColor,Sides side)
 	{
 
@@ -78,22 +90,42 @@ public class GPManager : MonoBehaviour {
 
 	public void _clearDot(GameObject leftside ,GameObject rightside)
 	{
-
-		int leftTotal = leftside.transform.childCount;
-		int rightTotal = rightside.transform.childCount; 
-		for (int i = 0; i <= leftTotal; i++) 
-		{
-			GameObject temp = leftside.transform.GetChild (i).gameObject;
-			temp.transform.parent = null;
-			Destroy (temp);
-		}
-		for (int i = 0; i <= rightTotal; i++) 
-		{
-			GameObject temp = leftside.transform.GetChild (i).gameObject;
-			temp.transform.parent = null;
-			Destroy (temp);
+		
+		for (int i = 0; i < leftside.transform.childCount; i++) {	
+			if (leftside.transform.childCount > 0) {
+				GameObject temp = leftside.transform.GetChild (i).gameObject;
+				temp.transform.parent = null;
+				Destroy (temp);
+			}
 		}
 
+		for (int i = 0; i < rightside.transform.childCount; i++) {
+			if (rightside.transform.childCount > 0) {
+				GameObject temp = rightside.transform.GetChild (i).gameObject;
+				temp.transform.parent = null;
+				Destroy (temp);
+			}
+		}
+	}
 
+
+	private Sides _correctAnswer(int leftTotal , int rightTotal)
+	{
+		if(leftTotal > rightTotal)
+		{
+			return Sides.Left;
+		}
+		else
+		{
+			return Sides.Right;
+		}
+	}
+
+	private bool _checkAnswer(Sides correctAnswer ,Sides userChoice)
+	{
+		if (correctAnswer == userChoice)
+			return true;
+		
+		return false;
 	}
 }
