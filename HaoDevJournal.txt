@@ -1,17 +1,5 @@
-*** need for object pooling?
-spawnobject(string shape , prefab object , int amount, object color, game object right/left side)
-{
-	find right or left side and make sure spawn within the side
-	for(int i =0 ; i < amount , i++)
-		spawn obj in shape with color
-}
-
-clearObject(gameobject sidecontainer)
-{
-	while (container.length !=)
-		loop through container and delete objects 
-}
-
+To Do: 
+	display faces before starting next session and have it actually wait for the player input
 
 General devlopement 
 scene: 

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 public class SessionManager: MonoBehaviour {
 
     // holding left and right side information
@@ -21,7 +21,12 @@ public class SessionManager: MonoBehaviour {
 	private Sides CorrectAnswer;
 
 	// max session amount before moving onto another round 
-	int sessionMax; 
+	int sessionMax;
+	private int currentSession = 1;
+
+	// setting dot ratio
+	private RatioStruct dotRatio;
+
 	void Awake()
 	{
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
@@ -38,22 +43,46 @@ public class SessionManager: MonoBehaviour {
 
 	void Start () 
 	{
-		
+
 	}
 
 	void Update()
 	{
 		Debug.Log (userChoice);
+		for (int currentSession = 1; currentSession < sessionMax ;) 
+		{
+			RatioStruct tempRatio = new RatioStruct (1, 2);
+			RatioStruct dotPerSide = _dotPerSide (tempRatio, 50);
+			_spawnLocation ("WhiteDot", dotPerSide.cloud1, Color.magenta, Sides.Left);
+			_spawnLocation ("WhiteDot", dotPerSide.cloud2, Color.magenta, Sides.Right);
+
+			CorrectAnswer = _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
+			Debug.Log ("The correct answer is?: " + CorrectAnswer);
+			Debug.Log ("Correct answer ?: " + _checkAnswer (CorrectAnswer, userChoice));
+			
+			StartCoroutine (WaitForUserInput ());
+			_clearDot (leftScreen, rightScreen);
+			currentSession++;
+		}
 	}
 
+	// use to set some of the mananger parameter 
+	public void setSessionMax (int max)
+	{
+		this.sessionMax = max;
+	}
 
+	public void setSessionRatio(RatioStruct desiredRatio)
+	{
+		this.dotRatio = desiredRatio;
+	}
 
 	// need to create some enumerations to make cleaner code
 	// might need to create some sort of switch case to determine: which object to spawn and which shape to spawn the object in 
 	// ignoring what shape the object should spawn in 
 
 
-	void spawnLocation(string obj, int amount , Color objectColor,Sides side)
+	void _spawnLocation(string obj, int amount , Color objectColor,Sides side)
 	{
 
 		switch(side)
@@ -127,5 +156,65 @@ public class SessionManager: MonoBehaviour {
 			return true;
 		
 		return false;
+	}
+
+	private RatioStruct _dotPerSide(RatioStruct ratio,  int totalDots, int min =1)
+	{
+		RatioStruct dotPerSide = new RatioStruct(); 
+		int cloud1Ratio = ratio.cloud1;
+		int cloud2Ratio = ratio.cloud2; 
+		int cloudDot = 0;
+		int total = totalDots;
+		int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,total);
+		int leftOrRight = Random.Range (1, 3);
+
+		Debug.Log (leftOrRight);
+		while(!_isRatioInParameters(cloudDot,cloud1Ratio,cloud2Ratio,total))
+		{
+			cloudDot = Random.Range (min, largestDot+1); 
+
+		}
+
+
+		switch (leftOrRight) 
+		{
+			case 1: 
+				dotPerSide.cloud1 = Mathf.FloorToInt(cloudDot * cloud1Ratio);
+				dotPerSide.cloud2 = Mathf.FloorToInt(cloudDot * cloud2Ratio);
+				break;
+			case 2:
+				dotPerSide.cloud2 = Mathf.FloorToInt (cloudDot * cloud1Ratio);
+				dotPerSide.cloud1 = Mathf.FloorToInt (cloudDot * cloud2Ratio);
+				break;
+		}
+
+		return dotPerSide;
+
+	}
+
+	private bool _isRatioInParameters(int cloudDot ,int ratio1 , int ratio2, int totalDot)
+	{
+		if( (cloudDot*ratio1 + cloudDot*ratio2 <= totalDot)&& (cloudDot*ratio1 + cloudDot*ratio2) > 0)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+
+	private int _LargestRatio(int ratio1 , int ratio2 , int totalDot)
+	{
+		return  Mathf.FloorToInt (totalDot / (ratio1 + ratio2)); 
+	}
+
+	 IEnumerator WaitForUserInput()
+	{
+		while (Input.touchCount == 0) {
+			yield return null;
+		
+		}
 	}
 }
