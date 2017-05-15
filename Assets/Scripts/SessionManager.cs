@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// temp
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 public class SessionManager: MonoBehaviour {
 
@@ -22,10 +24,19 @@ public class SessionManager: MonoBehaviour {
 
 	// max session amount before moving onto another round 
 	int sessionMax;
+	// current session the player is on
 	private int currentSession = 1;
-
-	// setting dot ratio
+	// the dot ratio for dot randomization 
 	private RatioStruct dotRatio;
+	// the color of the dots
+	private Color dotColor;
+	// not impelemented yet up a enum value that would determine the shape the dots are in
+	// a string that tells what kind of object to represent the dot like an actual white dot or a dinosaur 
+	private string dotSprite;
+	// maximum amount of dots allowed on the screen
+	private int dotMax;
+
+
 
 	void Awake()
 	{
@@ -36,34 +47,22 @@ public class SessionManager: MonoBehaviour {
 		leftSidePos = leftScreen.transform.position;
 
 		leftContainer = leftScreen.transform.GetChild (0);
-		rightContainer = rightScreen.transform.GetChild (0);
-		sessionMax = 10;
+		rightContainer = rightScreen.transform.GetChild (0);	
 		userChoice = Sides.Null;
+
+
 	}
 
 	void Start () 
 	{
+		
+		this.dotRatio = new RatioStruct(2,3);
+		this.dotColor= Color.white;
+		this.sessionMax = 10;
+		this.dotSprite = "WhiteDot";
+		this.dotMax = 50;
 
-	}
-
-	void Update()
-	{
-		Debug.Log (userChoice);
-		for (int currentSession = 1; currentSession < sessionMax ;) 
-		{
-			RatioStruct tempRatio = new RatioStruct (1, 2);
-			RatioStruct dotPerSide = _dotPerSide (tempRatio, 50);
-			_spawnLocation ("WhiteDot", dotPerSide.cloud1, Color.magenta, Sides.Left);
-			_spawnLocation ("WhiteDot", dotPerSide.cloud2, Color.magenta, Sides.Right);
-
-			CorrectAnswer = _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
-			Debug.Log ("The correct answer is?: " + CorrectAnswer);
-			Debug.Log ("Correct answer ?: " + _checkAnswer (CorrectAnswer, userChoice));
-			
-			StartCoroutine (WaitForUserInput ());
-			_clearDot (leftScreen, rightScreen);
-			currentSession++;
-		}
+		createSession ();
 	}
 
 	// use to set some of the mananger parameter 
@@ -77,21 +76,54 @@ public class SessionManager: MonoBehaviour {
 		this.dotRatio = desiredRatio;
 	}
 
+	public void setColor (Color color)
+	{
+		this.dotColor = color;
+	}
+
+	public void setDotSprite(string sprite)
+	{
+		this.dotSprite = sprite;
+	}
+
 	// need to create some enumerations to make cleaner code
 	// might need to create some sort of switch case to determine: which object to spawn and which shape to spawn the object in 
 	// ignoring what shape the object should spawn in 
 
+	public int getMaxSession()
+	{
+		return this.sessionMax;
+	}
 
-	void _spawnLocation(string obj, int amount , Color objectColor,Sides side)
+	public int getCurrentSession()
+	{
+		return this.currentSession;
+	}
+	public void incCurrentSession()
+	{
+		this.currentSession += 1;
+	}
+ 	public void createSession()
+	{
+
+		
+		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
+		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud1, this.dotColor, Sides.Left);
+		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud2, this.dotColor, Sides.Right);
+
+		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
+		_clearDot (this.leftContainer, this.rightContainer);
+	}
+	void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int amount , Color objectColor,Sides side)
 	{
 
 		switch(side)
 		{
 			case Sides.Left:
-				_spawnDot (leftContainer, obj, amount, leftSidePos , objectColor );
+				_spawnDot (lContainer, obj, amount, leftSidePos , objectColor );
 				break;
 			case Sides.Right:
-				_spawnDot (rightContainer, obj, amount, rightSidePos  , objectColor);
+				_spawnDot (rContainer, obj, amount, rightSidePos  , objectColor);
 				break; 
 			default:
 				Debug.Log ("Something Went Wrong");
@@ -113,24 +145,24 @@ public class SessionManager: MonoBehaviour {
 			dotPos = new Vector2 (circlePos.x + sideScale.x, circlePos.y + sideScale.y);
 			spawnDot = Instantiate(dot,dotPos,transform.rotation) as GameObject;
 			spawnDot.GetComponentInChildren<SpriteRenderer> ().color = objectColor;
-			spawnDot.transform.parent = container;
+			spawnDot.transform.parent = container ;
 		}
 	}
 
-	public void _clearDot(GameObject leftside ,GameObject rightside)
+	public void _clearDot(Transform leftContainer ,Transform rightContainer)
 	{
 		
-		for (int i = 0; i < leftside.transform.childCount; i++) {	
-			if (leftside.transform.childCount > 0) {
-				GameObject temp = leftside.transform.GetChild (i).gameObject;
+		for (int i = 0; i < leftContainer.childCount; i++) {	
+			if (leftContainer.childCount > 0) {
+				GameObject temp = leftContainer.GetChild (i).gameObject;
 				temp.transform.parent = null;
 				Destroy (temp);
 			}
 		}
 
-		for (int i = 0; i < rightside.transform.childCount; i++) {
-			if (rightside.transform.childCount > 0) {
-				GameObject temp = rightside.transform.GetChild (i).gameObject;
+		for (int i = 0; i < rightContainer.childCount; i++) {
+			if (rightContainer.childCount > 0) {
+				GameObject temp = rightContainer.GetChild (i).gameObject;
 				temp.transform.parent = null;
 				Destroy (temp);
 			}
@@ -168,11 +200,11 @@ public class SessionManager: MonoBehaviour {
 		int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,total);
 		int leftOrRight = Random.Range (1, 3);
 
-		Debug.Log (leftOrRight);
+// 			Debug.Log (leftOrRight);
 		while(!_isRatioInParameters(cloudDot,cloud1Ratio,cloud2Ratio,total))
 		{
 			cloudDot = Random.Range (min, largestDot+1); 
-
+			Debug.Log ("cloud dot: " + cloudDot);
 		}
 
 
@@ -194,7 +226,7 @@ public class SessionManager: MonoBehaviour {
 
 	private bool _isRatioInParameters(int cloudDot ,int ratio1 , int ratio2, int totalDot)
 	{
-		if( (cloudDot*ratio1 + cloudDot*ratio2 <= totalDot)&& (cloudDot*ratio1 + cloudDot*ratio2) > 0)
+		if( (cloudDot*ratio1 + cloudDot*ratio2 <= totalDot)&& ((cloudDot*ratio1 + cloudDot*ratio2) > 0))
 		{
 			return true;
 		}
@@ -210,11 +242,43 @@ public class SessionManager: MonoBehaviour {
 		return  Mathf.FloorToInt (totalDot / (ratio1 + ratio2)); 
 	}
 
-	 IEnumerator WaitForUserInput()
+	public void displayResult()
 	{
-		while (Input.touchCount == 0) {
-			yield return null;
-		
+		_clearDot (this.leftContainer, this.rightContainer);
+		if (_checkAnswer (this.CorrectAnswer, this.userChoice)) {
+			GameObject result = Resources.Load ("correct1") as GameObject;
+			GameObject spawnedResult =Instantiate (result, new Vector2(0,0), Quaternion.identity);
+			StartCoroutine(waitAndDelete (spawnedResult));
+		} else {
+
+			GameObject result = Resources.Load ("incorrect1") as GameObject;
+			GameObject spawnedResult = Instantiate (result, new Vector2(0,0), Quaternion.identity);
+			StartCoroutine( waitAndDelete (spawnedResult));
 		}
 	}
+
+	private IEnumerator waitAndDelete(GameObject resultSprite)
+	{
+
+		yield return new WaitForSeconds (1);
+		Destroy (resultSprite);
+	}
+
+	public IEnumerator waitAndStartSession()
+	{
+
+		Debug.Log ("inside enumerator");
+		_clearDot (this.leftContainer, this.rightContainer);
+		yield return new WaitForSeconds (2);
+		if (this.currentSession <= this.sessionMax) {
+			this.incCurrentSession ();
+			this.createSession ();
+		}
+		else{
+			Debug.Log("finished");
+			SceneManager.LoadScene (0);
+		}
+	}
+
+
 }

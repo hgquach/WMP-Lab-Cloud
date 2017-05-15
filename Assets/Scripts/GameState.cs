@@ -41,7 +41,7 @@ public class GameState : MonoBehaviour {
 			return false;
 		}
 	}
-
+		
 	public  IEnumerator waitAndTransistion()
 	{
 		yield return new WaitForSeconds(1);

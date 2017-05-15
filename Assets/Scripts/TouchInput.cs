@@ -7,12 +7,12 @@ public class TouchInput : MonoBehaviour {
 	// Use this for initialization
 	private BoxCollider2D leftScreen; 
 	private BoxCollider2D rightScreen;
-	private GameState gamestate;
+	private SessionManager sessionmanager;
 	void Awake()
 	{
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen").GetComponent<BoxCollider2D>();
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen").GetComponent<BoxCollider2D>();
-		gamestate = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameState> ();
+		sessionmanager= GameObject.FindGameObjectWithTag ("SessionManager").GetComponent<SessionManager> ();
 	}
 	void Start () 
 	{
@@ -25,18 +25,23 @@ public class TouchInput : MonoBehaviour {
 
 		if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
 		{
+			Debug.Log ("current session: " + sessionmanager.getCurrentSession());
 			Vector3 pos = Camera.main.ScreenToWorldPoint (Input.GetTouch (0).position);
 			if (rightScreen.bounds.Contains (pos)) {
 				Debug.Log ("inside right");
-				GameState.choice = 1;
+				sessionmanager.userChoice= SessionManager.Sides.Right;
+				sessionmanager.displayResult ();
+				StartCoroutine(sessionmanager.waitAndStartSession ());
+
 			}
 
 			if (leftScreen.bounds.Contains (pos)) {
 				Debug.Log ("inside left");
-				GameState.choice = 2;
+				sessionmanager.userChoice= SessionManager.Sides.Left;
+				sessionmanager.displayResult ();
+				StartCoroutine(sessionmanager.waitAndStartSession ());
 			}
 
-			gamestate.transistionStart();
 //			Debug.Log ("touch world pos.x " + pos.x);
 //			Debug.Log ("touch world pos.y "+ pos.y);
 //			Debug.Log ("touch world pos.z "+ pos.z);
