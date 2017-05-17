@@ -4,7 +4,7 @@ using UnityEngine;
 // temp
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
-public class SessionManager: MonoBehaviour {
+public class SessionManagerTest: MonoBehaviour {
 
     // holding left and right side information
 	GameObject leftScreen;
