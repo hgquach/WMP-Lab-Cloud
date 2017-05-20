@@ -37,7 +37,7 @@ public class SessionManagerTest: MonoBehaviour {
 	private int dotMax;
 	// make sure the user can only enter input is valid during certain periods
 	private bool readyForUser = true;
-	private GameObject[] dotArray;
+	private List<GameObject> dotList = new List<GameObject>();
 
 
 	void Awake()
@@ -112,11 +112,11 @@ public class SessionManagerTest: MonoBehaviour {
 	}
  	public void createSession()
 	{
-
+        _clearGameObjectList(this.dotList);
 		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud2, this.dotColor, Sides.Right);
-
+        
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
 	}
 	private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int amount , Color objectColor,Sides side)
@@ -146,11 +146,24 @@ public class SessionManagerTest: MonoBehaviour {
 		Vector2 dotPos;
 		for(int i = 0 ; i < amount ; i++)
 		{
-			circlePos = Random.insideUnitCircle * 3 ; 
-			dotPos = new Vector2 (circlePos.x + sideScale.x, circlePos.y + sideScale.y);
-			spawnDot = Instantiate(dot,dotPos,transform.rotation) as GameObject;
-			spawnDot.GetComponentInChildren<SpriteRenderer> ().color = objectColor;
+            bool overLapChecking = true;
+            do {
+                circlePos = Random.insideUnitCircle * 3;
+                dotPos = new Vector2(circlePos.x + sideScale.x, circlePos.y + sideScale.y);
+                spawnDot = Instantiate(dot, dotPos, transform.rotation) as GameObject;
+                if(_checkOverlap(spawnDot,this.dotList))
+                {
+                    Destroy(spawnDot);
+                }
+                else
+                {
+                    overLapChecking = false;
+                }
+            }while ( overLapChecking);
+            spawnDot.GetComponentInChildren<SpriteRenderer>().color = objectColor;
 			spawnDot.transform.parent = container ;
+            this.dotList.Add(spawnDot);
+
 		}
 	}
 
@@ -296,5 +309,38 @@ public class SessionManagerTest: MonoBehaviour {
 		}
 	}
 
+    private bool _checkOverlap(GameObject dotPos, List<GameObject> dotList)
+    {
+        if (dotList.Count > 0)
+        {
+            foreach (GameObject checkDot in dotList)
+            {
+                if (dotPos != null && checkDot !=null)
+                {
+
+
+                    if (checkDot.GetComponentInChildren<Renderer>().bounds.Intersects(dotPos.GetComponentInChildren<Renderer>().bounds))
+                    {
+                        print(" overlapped");
+                        return true;
+
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void _clearGameObjectList(List<GameObject> dotList)
+    {
+        foreach(GameObject dot in dotList)
+        {
+            if(dot!= null)
+            {
+                Destroy(dot);
+            }
+        }
+    }
 
 }
