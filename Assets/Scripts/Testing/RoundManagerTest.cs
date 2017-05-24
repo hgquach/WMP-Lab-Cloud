@@ -4,7 +4,7 @@ using UnityEngine;
 // temp
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
-public class SessionManagerTest: MonoBehaviour {
+public class RoundManagerTest: MonoBehaviour {
 
     // holding left and right side information
 	GameObject leftScreen;
@@ -13,6 +13,7 @@ public class SessionManagerTest: MonoBehaviour {
 	Transform rightContainer;
 	Vector2 leftSidePos;
 	Vector2 rightSidePos;
+    SessionManager sessionManager;
 
 	// used to make targeting left and right side easier
 	public enum Sides {Right,Left,Null};
@@ -23,27 +24,39 @@ public class SessionManagerTest: MonoBehaviour {
 	private Sides CorrectAnswer;
 
 	// max session amount before moving onto another round 
-	int sessionMax;
+	int trialMax;
 	// current session the player is on
+    [SerializeField]
 	private int currentSession = 1;
 	// the dot ratio for dot randomization 
+    [SerializeField]
 	private RatioStruct dotRatio;
-	// the color of the dots
-	private Color dotColor;
+    // the color of the dots
+
+    [SerializeField]
+    private Color dotColor;
 	// not impelemented yet up a enum value that would determine the shape the dots are in
 	// a string that tells what kind of object to represent the dot like an actual white dot or a dinosaur 
+    [SerializeField]
 	private string dotSprite;
 	// maximum amount of dots allowed on the screen
+    [SerializeField]
 	private int dotMax;
 	// make sure the user can only enter input is valid during certain periods
 	private bool readyForUser = true;
+
+    // keep a list of spawned dot gameobjects to iterate through to make filtering easier 
 	private List<GameObject> dotList = new List<GameObject>();
-
-
+    //private int for configuring dot separation
+    private int dotSeparation;
+    // private bools to symbolize when the round should start or not
+    private bool isRoundStart;
+    // private bools to show when the round has finished all the trials
 	void Awake()
 	{
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen");
+        sessionManager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
 
 		rightSidePos = rightScreen.transform.position;
 		leftSidePos = leftScreen.transform.position;
@@ -51,20 +64,17 @@ public class SessionManagerTest: MonoBehaviour {
 		leftContainer = leftScreen.transform.GetChild (0);
 		rightContainer = rightScreen.transform.GetChild (0);	
 		userChoice = Sides.Null;
-
+        isRoundStart = false;
 
 	}
 
 	void Start () 
 	{
-		
-		this.dotRatio = new RatioStruct(2,3);
-		this.dotColor= Color.white;
-		this.sessionMax = 10;
-		this.dotSprite = "WhiteDot";
-		this.dotMax = 50;
-
-		createSession ();
+        Debug.Log(isRoundStart);
+        if(isRoundStart)
+        {
+            createTrial();
+        }
 	}
 
 	public bool isReadyForUser()
@@ -73,12 +83,12 @@ public class SessionManagerTest: MonoBehaviour {
 	}
 
 	// use to set some of the mananger parameter 
-	public void setSessionMax (int max)
+	public void setTrialMax (int max)
 	{
-		this.sessionMax = max;
+		this.trialMax = max;
 	}
 
-	public void setSessionRatio(RatioStruct desiredRatio)
+	public void setTrialRatio(RatioStruct desiredRatio)
 	{
 		this.dotRatio = desiredRatio;
 	}
@@ -93,42 +103,67 @@ public class SessionManagerTest: MonoBehaviour {
 		this.dotSprite = sprite;
 	}
 
-	// need to create some enumerations to make cleaner code
-	// might need to create some sort of switch case to determine: which object to spawn and which shape to spawn the object in 
-	// ignoring what shape the object should spawn in 
+    public void setDotSeperation(int distance)
+    {
+        this.dotSeparation = distance;
+    }
 
-	public int getMaxSession()
+    public void setDotMax(int max)
+    {
+        this.dotMax = max;
+    }
+
+    public int getMaxTrial()
 	{
-		return this.sessionMax;
+		return this.trialMax;
 	}
 
-	public int getCurrentSession()
+	public int getCurrentTrial()
 	{
 		return this.currentSession;
 	}
-	public void incCurrentSession()
+
+    public void incCurrentTrial()
 	{
 		this.currentSession += 1;
 	}
- 	public void createSession()
+
+    public bool getRoundStart()
+    {
+        return this.isRoundStart;
+    }
+
+    public void roundStart()
+    {
+        if(!this.isRoundStart)
+        {
+            this.isRoundStart = true;
+            return;
+        }
+        this.isRoundStart = false;
+
+    }
+
+    public void createTrial()
 	{
         _clearGameObjectList(this.dotList);
 		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
-		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud1, this.dotColor, Sides.Left);
-		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, dotPerSide.cloud2, this.dotColor, Sides.Right);
+		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
+		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
         
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
 	}
-	private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int amount , Color objectColor,Sides side)
+
+    private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int separation ,int amount , Color objectColor,Sides side)
 	{
 
 		switch(side)
 		{
 			case Sides.Left:
-				_spawnDot (lContainer, obj, amount, leftSidePos , objectColor );
+				_spawnDot (lContainer, obj, separation ,amount, leftSidePos , objectColor );
 				break;
 			case Sides.Right:
-				_spawnDot (rContainer, obj, amount, rightSidePos  , objectColor);
+				_spawnDot (rContainer, obj, separation ,amount, rightSidePos  , objectColor);
 				break; 
 			default:
 				Debug.Log ("Something Went Wrong");
@@ -138,7 +173,7 @@ public class SessionManagerTest: MonoBehaviour {
 		
 	}
 
-	private void _spawnDot(Transform container,string obj, int amount, Vector2 sideScale , Color objectColor)	
+	private void _spawnDot(Transform container,string obj, int separation ,int amount, Vector2 sideScale , Color objectColor)	
 	{
 		GameObject spawnDot;
 		GameObject dot = Resources.Load (obj) as GameObject;
@@ -146,20 +181,21 @@ public class SessionManagerTest: MonoBehaviour {
 		Vector2 dotPos;
 		for(int i = 0 ; i < amount ; i++)
 		{
-            bool overLapChecking = true;
+            bool restrictNotPass = true;
             do {
                 circlePos = Random.insideUnitCircle * 3;
                 dotPos = new Vector2(circlePos.x + sideScale.x, circlePos.y + sideScale.y);
                 spawnDot = Instantiate(dot, dotPos, transform.rotation) as GameObject;
-                if(_checkOverlap(spawnDot,this.dotList))
+                if(!_checkOverlap(spawnDot,this.dotList) && !_checkSeparation(separation, spawnDot,this.dotList))
                 {
-                    Destroy(spawnDot);
+                    restrictNotPass = false;
                 }
                 else
                 {
-                    overLapChecking = false;
+                    Destroy(spawnDot);
+                    print("Destroyed dot");
                 }
-            }while ( overLapChecking);
+            }while ( restrictNotPass);
             spawnDot.GetComponentInChildren<SpriteRenderer>().color = objectColor;
 			spawnDot.transform.parent = container ;
             this.dotList.Add(spawnDot);
@@ -189,7 +225,6 @@ public class SessionManagerTest: MonoBehaviour {
 		Debug.Log ("left container holds: "+leftContainer.childCount);
 		Debug.Log ("right container holds: "+rightContainer.childCount);
 	}
-
 
 	private Sides _correctAnswer(int leftTotal , int rightTotal)
 	{
@@ -296,16 +331,17 @@ public class SessionManagerTest: MonoBehaviour {
 	public IEnumerator waitAndStartSession()
 	{
 
-		Debug.Log ("inside enumerator");
+		//Debug.Log ("inside enumerator");
 		yield return new WaitForSeconds (1);
-		if (this.currentSession <= this.sessionMax) {
-			this.incCurrentSession ();
-			this.createSession ();
+		if (this.currentSession <= this.trialMax) {
+			this.incCurrentTrial ();
+			this.createTrial ();
 			this.readyForUser = true;
 		}
 		else{
-			Debug.Log("finished");
-			SceneManager.LoadScene (0);
+            Debug.Log("round is over");
+            this.isRoundStart = false;
+            sessionManager.incRound();
 		}
 	}
 
@@ -342,5 +378,26 @@ public class SessionManagerTest: MonoBehaviour {
             }
         }
     }
+// there is a problem with this function because the dots positions are determined using the random.insideunitcirlce then multiplied by a multiplier 
+// depending on the multiplier the distance of seperation required make the function's evaluation faulty. 
+    private bool _checkSeparation(int distance,GameObject dotPos, List<GameObject> dotList)
+    {
+        if(dotList.Count > 0)
+        {
+            foreach(GameObject checkDot in dotList)
+            {
+                if (dotPos != null && checkDot != null)
+                {
+                    //print("distance of dots =: "+ Mathf.FloorToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position,checkDot.GetComponent<Transform>().position)));
+                    if (distance > (Mathf.CeilToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position, checkDot.GetComponent<Transform>().position))))
+                    {
+                        print("not far enough");
+                        return true;
+                    }
+                }
+            }
+        }
 
+        return false;   
+    }
 }
