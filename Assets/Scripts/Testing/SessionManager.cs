@@ -10,7 +10,7 @@ public class SessionManager : MonoBehaviour {
     //this.dotSprite = "WhiteDot";
     //this.dotMax = 50;
     //      this.dotSeparation = 1;
-
+    TextUpdate textupdate;
     RoundManagerTest roundManager;
     [SerializeField]
     private int maxRound;
@@ -18,17 +18,22 @@ public class SessionManager : MonoBehaviour {
     private int currentRound;
     [SerializeField]
     private int currentLevel;
-    private RatioStruct tempRatio;
+    private ThemeStruct[] themeArray = new ThemeStruct[2];
+    private LevelStruct[] levelArray = new LevelStruct[3];
+
     void Awake()
     {
         roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
+        textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
 
+        levelArray[0] = new LevelStruct(1,10,1,new RatioStruct(1,3));
+        levelArray[1] = new LevelStruct(2,50,1,new RatioStruct(3,4));
+
+        themeArray[0] = new ThemeStruct("WoodLand","WhiteDot",Color.black, new List<Color> { Color.white,Color.blue,Color.yellow,Color.red});
         this.currentRound = 1;
-        this.currentLevel = 1;
+        this.currentLevel = 0;
         this.maxRound = 3;
-        this.tempRatio = new RatioStruct(1, 3);
-        UpdateRound(tempRatio, Color.white, 10, "WhiteDot", 30);
-        roundManager.roundStart();
+        
     }
 
     void Start()
@@ -38,14 +43,22 @@ public class SessionManager : MonoBehaviour {
 
     void Update()
     {
-        if(!roundManager.getRoundStart() && this.currentRound != 1)
+        if(!roundManager.getRoundStart())
         {
-            Debug.Log("adjusting next round round");
-            if(this.currentRound != this.maxRound)
+            Debug.Log("adjusting next round");
+            if(this.currentRound <= this.maxRound)
             {
+                LevelStruct tempLevel = levelArray[this.currentLevel];
+                ThemeStruct tempTheme = themeArray[0];
                 Debug.Log("new round");
-                this.UpdateRound(tempRatio, Color.blue, 5, "WhiteDot", 50);
+                this.UpdateRound(tempLevel.ratio,tempTheme.returnRandomColor(),tempLevel.trialMax,tempTheme.dotShape,tempLevel.dotMax,tempLevel.spread);
+                StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
                 roundManager.roundStart();
+                if(this.currentLevel > 1)
+                {
+                    Debug.Log("Session Over");
+                }
+                this.currentLevel += 1;
             }
             //look at the hypothetical trial recording manager and see if the accuracy is above a threshold and 
             //adjust the round and start it
@@ -53,19 +66,28 @@ public class SessionManager : MonoBehaviour {
         }
     }
 
-    void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 1)
+    private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 1)
     {
         Debug.Log("updating round");
+        this.roundManager.resetRoundValue();
         this.roundManager.setColor(color);
         this.roundManager.setDotSeperation(dotSepartaion);
         this.roundManager.setTrialMax(trialMax);
         this.roundManager.setDotSprite(dotSprite);
         this.roundManager.setTrialRatio(ratio);
-        this.roundManager.setDotMax(50);
+        this.roundManager.setDotMax(dotMax);
     }
 
     public void incRound()
     {
         this.currentRound += 1;
+    }
+
+    private IEnumerator waitDisplay(int level ,string themeName)
+    {
+        textupdate.updateRoundTitle(level, themeName);
+        textupdate.displayTitle();
+        yield return new WaitForSeconds(1f);
+        textupdate.hideTitle();
     }
 }

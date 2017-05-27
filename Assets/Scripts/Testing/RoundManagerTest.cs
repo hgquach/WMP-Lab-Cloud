@@ -14,6 +14,7 @@ public class RoundManagerTest: MonoBehaviour {
 	Vector2 leftSidePos;
 	Vector2 rightSidePos;
     SessionManager sessionManager;
+    GameObject sideDivider;
 
 	// used to make targeting left and right side easier
 	public enum Sides {Right,Left,Null};
@@ -23,11 +24,11 @@ public class RoundManagerTest: MonoBehaviour {
 	public Sides userChoice; 
 	private Sides CorrectAnswer;
 
-	// max session amount before moving onto another round 
-	int trialMax;
-	// current session the player is on
+	// max trial amount before moving onto another round 
+	private int trialMax;
+	// current trial the player is on
     [SerializeField]
-	private int currentSession = 1;
+	private int currentTrial = 0;
 	// the dot ratio for dot randomization 
     [SerializeField]
 	private RatioStruct dotRatio;
@@ -51,13 +52,15 @@ public class RoundManagerTest: MonoBehaviour {
     private int dotSeparation;
     // private bools to symbolize when the round should start or not
     private bool isRoundStart;
-    // private bools to show when the round has finished all the trials
+
+    // bool to check if the round is currently underway 
+    private bool roundRunning;
 	void Awake()
 	{
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen");
         sessionManager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
-
+        sideDivider = GameObject.FindGameObjectWithTag("Divider");
 		rightSidePos = rightScreen.transform.position;
 		leftSidePos = leftScreen.transform.position;
 
@@ -65,16 +68,8 @@ public class RoundManagerTest: MonoBehaviour {
 		rightContainer = rightScreen.transform.GetChild (0);	
 		userChoice = Sides.Null;
         isRoundStart = false;
+        roundRunning = false;
 
-	}
-
-	void Start () 
-	{
-        Debug.Log(isRoundStart);
-        if(isRoundStart)
-        {
-            createTrial();
-        }
 	}
 
 	public bool isReadyForUser()
@@ -120,12 +115,12 @@ public class RoundManagerTest: MonoBehaviour {
 
 	public int getCurrentTrial()
 	{
-		return this.currentSession;
+		return this.currentTrial;
 	}
 
     public void incCurrentTrial()
 	{
-		this.currentSession += 1;
+		this.currentTrial += 1;
 	}
 
     public bool getRoundStart()
@@ -138,6 +133,8 @@ public class RoundManagerTest: MonoBehaviour {
         if(!this.isRoundStart)
         {
             this.isRoundStart = true;
+            createTrial();
+            this.currentTrial += 1;
             return;
         }
         this.isRoundStart = false;
@@ -146,13 +143,21 @@ public class RoundManagerTest: MonoBehaviour {
 
     public void createTrial()
 	{
+
         _clearGameObjectList(this.dotList);
 		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
-        
+       StartCoroutine( this._addDivider());
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
 	}
+
+    public void resetRoundValue()
+    {
+        this.userChoice = Sides.Null;
+        this.currentTrial = 0;
+        this.readyForUser = true;
+    }
 
     private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int separation ,int amount , Color objectColor,Sides side)
 	{
@@ -193,7 +198,7 @@ public class RoundManagerTest: MonoBehaviour {
                 else
                 {
                     Destroy(spawnDot);
-                    print("Destroyed dot");
+                    //print("Destroyed dot");
                 }
             }while ( restrictNotPass);
             spawnDot.GetComponentInChildren<SpriteRenderer>().color = objectColor;
@@ -222,8 +227,8 @@ public class RoundManagerTest: MonoBehaviour {
 
 		}
 
-		Debug.Log ("left container holds: "+leftContainer.childCount);
-		Debug.Log ("right container holds: "+rightContainer.childCount);
+		//Debug.Log ("left container holds: "+leftContainer.childCount);
+		//Debug.Log ("right container holds: "+rightContainer.childCount);
 	}
 
 	private Sides _correctAnswer(int leftTotal , int rightTotal)
@@ -323,8 +328,8 @@ public class RoundManagerTest: MonoBehaviour {
 
 	private IEnumerator waitAndDelete(GameObject resultSprite)
 	{
-
-		yield return new WaitForSeconds (.5f);
+        this._removeDivider();
+		yield return new WaitForSeconds (1);
 		Destroy (resultSprite);
 	}
 
@@ -332,13 +337,14 @@ public class RoundManagerTest: MonoBehaviour {
 	{
 
 		//Debug.Log ("inside enumerator");
-		yield return new WaitForSeconds (1);
-		if (this.currentSession <= this.trialMax) {
+		yield return new WaitForSeconds (1.5f);
+		if (this.currentTrial <= this.trialMax) {
 			this.incCurrentTrial ();
 			this.createTrial ();
 			this.readyForUser = true;
 		}
-		else{
+		else
+        {
             Debug.Log("round is over");
             this.isRoundStart = false;
             sessionManager.incRound();
@@ -357,7 +363,7 @@ public class RoundManagerTest: MonoBehaviour {
 
                     if (checkDot.GetComponentInChildren<Renderer>().bounds.Intersects(dotPos.GetComponentInChildren<Renderer>().bounds))
                     {
-                        print(" overlapped");
+                        //print(" overlapped");
                         return true;
 
                     }
@@ -391,7 +397,7 @@ public class RoundManagerTest: MonoBehaviour {
                     //print("distance of dots =: "+ Mathf.FloorToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position,checkDot.GetComponent<Transform>().position)));
                     if (distance > (Mathf.CeilToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position, checkDot.GetComponent<Transform>().position))))
                     {
-                        print("not far enough");
+                       // print("not far enough");
                         return true;
                     }
                 }
@@ -399,5 +405,16 @@ public class RoundManagerTest: MonoBehaviour {
         }
 
         return false;   
+    }
+
+    private void _removeDivider()
+    {
+        sideDivider.GetComponent<LineRenderer>().enabled = false;
+    }
+
+    private IEnumerator _addDivider()
+    {
+        yield return new WaitForSeconds(.5f);
+        sideDivider.GetComponent<LineRenderer>().enabled = true;
     }
 }

@@ -5,25 +5,31 @@ using UnityEngine;
 public class TextUpdate : MonoBehaviour {
 
 
-	private string baseText ="Level ";
+	private string baseLevel ="Level ";
+    private string baseTheme = "";
 	private TextMesh textMesh; 
-	private GameState gamestate;
 	void Awake()
 	{
-		gamestate = GameObject.FindGameObjectWithTag ("GameManager").GetComponent<GameState> ();
 		textMesh = this.GetComponent<TextMesh>();
+        this.GetComponent<MeshRenderer>().enabled = false;
 	}
 	// Use this for initialization
-	void Start () 
-	{
-		GameState.incCurrentLevel ();
-		textMesh.text = baseText + GameState.getCurrentLevel();
-      
-	}
+    public void updateRoundTitle(int level , string themeName)
+    {
+		textMesh.text = baseLevel + level + "\n"+ themeName ;
+
+    }
+
+    public void displayTitle()
+    {
+        this.GetComponent<MeshRenderer>().enabled = true;
+    }
+
+    public void hideTitle()
+    {
+        this.GetComponent<MeshRenderer>().enabled = false;
+    }
 	
 	// Update is called once per frame
-	void Update () 
-	{
-		gamestate.transistionStart();
-	}
+
 }
