@@ -29,7 +29,7 @@ public class TouchInput : MonoBehaviour {
                     //Debug.Log ("inside right");
                     roundManager.userChoice = RoundManagerTest.Sides.Right;
                     roundManager.displayResult();
-                    StartCoroutine(roundManager.waitAndStartSession());
+                    roundManager.waitAndStartSession();
 
                 }
 
@@ -38,7 +38,7 @@ public class TouchInput : MonoBehaviour {
                     //Debug.Log ("inside left");
                     roundManager.userChoice = RoundManagerTest.Sides.Left;
                     roundManager.displayResult();
-                    StartCoroutine(roundManager.waitAndStartSession());
+                    roundManager.waitAndStartSession();
                 }
 
                 //if (touchedCorner(pos,this.cornerArray))

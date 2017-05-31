@@ -133,7 +133,7 @@ public class RoundManagerTest: MonoBehaviour {
         if(!this.isRoundStart)
         {
             this.isRoundStart = true;
-            createTrial();
+            StartCoroutine(createTrial());
             this.currentTrial += 1;
             return;
         }
@@ -141,14 +141,15 @@ public class RoundManagerTest: MonoBehaviour {
 
     }
 
-    public void createTrial()
+    public IEnumerator createTrial()
 	{
 
         _clearGameObjectList(this.dotList);
 		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
+        yield return new WaitForSeconds(1.5f);
+        this._addDivider();
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
-       StartCoroutine( this._addDivider());
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
 	}
 
@@ -188,7 +189,7 @@ public class RoundManagerTest: MonoBehaviour {
 		{
             bool restrictNotPass = true;
             do {
-                circlePos = Random.insideUnitCircle * 3;
+                circlePos = Random.insideUnitCircle * 4;
                 dotPos = new Vector2(circlePos.x + sideScale.x, circlePos.y + sideScale.y);
                 spawnDot = Instantiate(dot, dotPos, transform.rotation) as GameObject;
                 if(!_checkOverlap(spawnDot,this.dotList) && !_checkSeparation(separation, spawnDot,this.dotList))
@@ -329,18 +330,18 @@ public class RoundManagerTest: MonoBehaviour {
 	private IEnumerator waitAndDelete(GameObject resultSprite)
 	{
         this._removeDivider();
-		yield return new WaitForSeconds (1);
+		yield return new WaitForSeconds (1f);
 		Destroy (resultSprite);
 	}
 
-	public IEnumerator waitAndStartSession()
+	public void waitAndStartSession()
 	{
 
 		//Debug.Log ("inside enumerator");
-		yield return new WaitForSeconds (1.5f);
 		if (this.currentTrial <= this.trialMax) {
-			this.incCurrentTrial ();
-			this.createTrial ();
+
+            this.incCurrentTrial ();
+			StartCoroutine(this.createTrial ());
 			this.readyForUser = true;
 		}
 		else
@@ -412,9 +413,8 @@ public class RoundManagerTest: MonoBehaviour {
         sideDivider.GetComponent<LineRenderer>().enabled = false;
     }
 
-    private IEnumerator _addDivider()
+    private void _addDivider()
     {
-        yield return new WaitForSeconds(.5f);
         sideDivider.GetComponent<LineRenderer>().enabled = true;
     }
 }

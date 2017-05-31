@@ -29,7 +29,7 @@ public class SessionManager : MonoBehaviour {
         levelArray[0] = new LevelStruct(1,10,1,new RatioStruct(1,3));
         levelArray[1] = new LevelStruct(2,50,1,new RatioStruct(3,4));
 
-        themeArray[0] = new ThemeStruct("WoodLand","WhiteDot",Color.black, new List<Color> { Color.white,Color.blue,Color.yellow,Color.red});
+        themeArray[0] = new ThemeStruct("WoodLand","star",Color.black, new List<Color> { Color.white,Color.blue,Color.yellow,Color.red});
         this.currentRound = 1;
         this.currentLevel = 0;
         this.maxRound = 3;
@@ -66,7 +66,7 @@ public class SessionManager : MonoBehaviour {
         }
     }
 
-    private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 1)
+    private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 2)
     {
         Debug.Log("updating round");
         this.roundManager.resetRoundValue();
@@ -85,9 +85,10 @@ public class SessionManager : MonoBehaviour {
 
     private IEnumerator waitDisplay(int level ,string themeName)
     {
+        yield return new WaitForSeconds(1f);
         textupdate.updateRoundTitle(level, themeName);
         textupdate.displayTitle();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(.5f);
         textupdate.hideTitle();
     }
 }
