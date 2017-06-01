@@ -13,6 +13,11 @@ public class SessionManager : MonoBehaviour {
     TextUpdate textupdate;
     RoundManagerTest roundManager;
     [SerializeField]
+    private bool isTimedSession;
+    // currently in seconds for testing but i will create a function to convert mins to seconds
+    [SerializeField]
+    private float timeLimit;
+    [SerializeField]
     private int maxRound;
     [SerializeField]
     private int currentRound;
@@ -33,6 +38,9 @@ public class SessionManager : MonoBehaviour {
         this.currentRound = 1;
         this.currentLevel = 0;
         this.maxRound = 3;
+
+        this.timeLimit = 120f;
+        this.isTimedSession = true;
         
     }
 
@@ -43,27 +51,44 @@ public class SessionManager : MonoBehaviour {
 
     void Update()
     {
-        if(!roundManager.getRoundStart())
+        if (!roundManager.getRoundStart())
         {
-            Debug.Log("adjusting next round");
-            if(this.currentRound <= this.maxRound)
+            if (this.isTimedSession)
             {
-                LevelStruct tempLevel = levelArray[this.currentLevel];
-                ThemeStruct tempTheme = themeArray[0];
-                Debug.Log("new round");
-                this.UpdateRound(tempLevel.ratio,tempTheme.returnRandomColor(),tempLevel.trialMax,tempTheme.dotShape,tempLevel.dotMax,tempLevel.spread);
-                StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
-                roundManager.roundStart();
-                if(this.currentLevel > 1)
+                GameObject Timer = (GameObject)Instantiate(Resources.Load("Timer"));
+                Timer timer = Timer.GetComponent<Timer>();
+                timer.setTimeLeft(this.timeLimit);
+                if (!timer.CheckTime())
                 {
-                    Debug.Log("Session Over");
+                    this.createTimeLimitRounds(this.timeLimit);
                 }
-                this.currentLevel += 1;
             }
-            //look at the hypothetical trial recording manager and see if the accuracy is above a threshold and 
-            //adjust the round and start it
-
+            else
+            {
+                this.createNumberOfRounds(this.currentRound, this.maxRound);
+            }
         }
+        //if(!roundManager.getRoundStart())
+        //{
+        //    Debug.Log("adjusting next round");
+        //    if(this.currentRound <= this.maxRound)
+        //    {
+        //        LevelStruct tempLevel = levelArray[this.currentLevel];
+        //        ThemeStruct tempTheme = themeArray[0];
+        //        Debug.Log("new round");
+        //        this.UpdateRound(tempLevel.ratio,tempTheme.returnRandomColor(),tempLevel.trialMax,tempTheme.dotShape,tempLevel.dotMax,tempLevel.spread);
+        //        StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
+        //        roundManager.roundStart();
+        //        if(this.currentLevel > 1)
+        //        {
+        //            Debug.Log("Session Over");
+        //        }
+        //        this.currentLevel += 1;
+        //    }
+        //    //look at the hypothetical trial recording manager and see if the accuracy is above a threshold and 
+        //    //adjust the round and start it
+
+        //}
     }
 
     private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 2)
@@ -90,5 +115,40 @@ public class SessionManager : MonoBehaviour {
         textupdate.displayTitle();
         yield return new WaitForSeconds(.5f);
         textupdate.hideTitle();
+    }
+
+    private void createNumberOfRounds(int currentRound , int maxRound)
+    {
+        if (currentRound <= maxRound)
+        {
+            // this is all temp
+            LevelStruct tempLevel = levelArray[this.currentLevel];
+            ThemeStruct tempTheme = themeArray[0];
+            Debug.Log("new round");
+
+            this.UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), tempLevel.trialMax, tempTheme.dotShape, tempLevel.dotMax, tempLevel.spread);
+            StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
+            roundManager.roundStart();
+            if (this.currentLevel > 1)
+            {
+                Debug.Log("Session Over");
+            }
+            this.currentLevel += 1;
+        }
+    }
+    
+    private void createTimeLimitRounds(float timeLeft)
+    {
+
+            // this is all temp
+            LevelStruct tempLevel = levelArray[this.currentLevel];
+            ThemeStruct tempTheme = themeArray[0];
+            Debug.Log("new round");
+
+            this.UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), tempLevel.trialMax, tempTheme.dotShape, tempLevel.dotMax, tempLevel.spread);
+            StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
+            roundManager.roundStart();
+
+        
     }
 }
