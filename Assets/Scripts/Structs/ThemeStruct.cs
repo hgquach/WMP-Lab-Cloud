@@ -10,11 +10,13 @@ public struct ThemeStruct
 {
     public string levelName,dotShape;
     public Color backgroundColor;
+    public string backgroundImage;
     public List<Color> dotColorRange;
     // distractor opition 
 
-    public ThemeStruct(string name , string shape , Color bgColor, List<Color> colorRange)
+    public ThemeStruct(string name , string shape , List<Color> colorRange,Color bgColor = default(Color), string bgImg = "none")
     {
+        this.backgroundImage = bgImg;
         this.levelName = name;
         this.dotShape = shape;
         this.backgroundColor = bgColor;

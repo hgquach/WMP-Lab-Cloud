@@ -17,9 +17,15 @@ public class Timer : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        this.timeLeft = this.timeLeft - Time.deltaTime;
-        if(Mathf.Approximately(this.timeLeft,0f))
+
+        if(!(this.timeLeft < 0f))
         {
+            this.timeLeft = this.timeLeft - Time.deltaTime;
+
+        }
+        else
+        {
+
             this.timeOver = true;
         }
 

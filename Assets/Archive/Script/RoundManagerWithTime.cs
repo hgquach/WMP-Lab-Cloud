@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+// temp
+using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
-public class RoundManagerTest: MonoBehaviour {
+public class RoundManagerWithTime: MonoBehaviour {
 
     // holding left and right side information
 	GameObject leftScreen;
@@ -18,6 +19,10 @@ public class RoundManagerTest: MonoBehaviour {
     SessionManager sessionManager;
     // hold the line renderer that draws the line down the middle of the screen
     GameObject sideDivider;
+    // holds the timer object that spawns if it is a timed session
+    GameObject TimerObject;
+    Timer timer;
+
 	// used to make targeting left and right side easier
 	public enum Sides {Right,Left,Null};
 
@@ -66,6 +71,7 @@ public class RoundManagerTest: MonoBehaviour {
         sideDivider = GameObject.FindGameObjectWithTag("Divider");
 		rightSidePos = rightScreen.transform.position;
 		leftSidePos = leftScreen.transform.position;
+        TimerObject = GameObject.FindGameObjectWithTag("Timer");
      
 		leftContainer = leftScreen.transform.GetChild (0);
 		rightContainer = rightScreen.transform.GetChild (0);	
@@ -74,7 +80,30 @@ public class RoundManagerTest: MonoBehaviour {
         roundRunning = false;
     }
 
+    void Start()
+    {
+        Debug.Log("is this timed?: " + this.isTimed);
+        if(this.isTimed)
+        {
+            this.timer = GameObject.FindGameObjectWithTag("Timer").GetComponent<Timer>();
+        }
+        else
+        {
+            this.isTimed = false;
+        }
+    }
 
+    void Update()
+    {
+        if( this.isTimed)
+        {
+            if (timer.CheckTime())
+            {
+                Debug.Log("session over");
+                SceneManager.LoadScene(0);
+            }
+        }
+    }
 	public bool isReadyForUser()
 	{
 		return this.readyForUser;

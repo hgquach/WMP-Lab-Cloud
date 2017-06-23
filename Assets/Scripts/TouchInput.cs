@@ -5,14 +5,14 @@ using UnityEngine;
 public class TouchInput : MonoBehaviour {
 
 	// Use this for initialization
-	private PolygonCollider2D leftScreen; 
-	private PolygonCollider2D rightScreen;
+	private BoxCollider2D leftScreen; 
+	private BoxCollider2D rightScreen;
 	private RoundManagerTest roundManager;
     //private BoxCollider2D[] cornerArray;
 	void Awake()
 	{
-		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen").GetComponent<PolygonCollider2D>();
-		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen").GetComponent<PolygonCollider2D>();
+		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen").GetComponent<BoxCollider2D>();
+		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen").GetComponent<BoxCollider2D>();
 		roundManager= GameObject.FindGameObjectWithTag ("RoundManager").GetComponent<RoundManagerTest> ();
        // cornerArray = GameObject.FindGameObjectWithTag("Corner").GetComponentsInChildren<BoxCollider2D>();
     }
@@ -29,7 +29,7 @@ public class TouchInput : MonoBehaviour {
                     //Debug.Log ("inside right");
                     roundManager.userChoice = RoundManagerTest.Sides.Right;
                     roundManager.displayResult();
-                    roundManager.waitAndStartSession();
+                    roundManager.waitAndStartTrial();
 
                 }
 
@@ -38,7 +38,7 @@ public class TouchInput : MonoBehaviour {
                     //Debug.Log ("inside left");
                     roundManager.userChoice = RoundManagerTest.Sides.Left;
                     roundManager.displayResult();
-                    roundManager.waitAndStartSession();
+                    roundManager.waitAndStartTrial();
                 }
 
                 //if (touchedCorner(pos,this.cornerArray))
