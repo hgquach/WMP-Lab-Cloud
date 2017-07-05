@@ -8,17 +8,16 @@ public class TouchInput : MonoBehaviour {
 	private BoxCollider2D leftScreen; 
 	private BoxCollider2D rightScreen;
 	private RoundManagerTest roundManager;
-    //private BoxCollider2D[] cornerArray;
 	void Awake()
 	{
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen").GetComponent<BoxCollider2D>();
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen").GetComponent<BoxCollider2D>();
 		roundManager= GameObject.FindGameObjectWithTag ("RoundManager").GetComponent<RoundManagerTest> ();
-       // cornerArray = GameObject.FindGameObjectWithTag("Corner").GetComponentsInChildren<BoxCollider2D>();
     }
 	
 	void Update () 
 	{
+
 		if (roundManager.isReadyForUser () && roundManager.getRoundStart()) 
 		{
 			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
@@ -56,25 +55,10 @@ public class TouchInput : MonoBehaviour {
 
 			
 	}
-
-    private bool touchedCorner(Vector3 pos , BoxCollider2D[] cornerColliders)
-    {
-        Debug.Log(pos);
-        foreach(BoxCollider2D corner in cornerColliders)
-        {
-            Debug.Log(corner.bounds.Contains(pos));
-
-            if (corner.bounds.Contains(pos))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-
-
-
 }
+
+
+
+
+
 

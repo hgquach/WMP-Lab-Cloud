@@ -61,8 +61,6 @@ public class RoundManagerWithTime: MonoBehaviour {
     private bool isRoundStart;
     //private bool to determine if the session is timed
     public bool isTimed;
-    // bool to check if the round is currently underway 
-    private bool roundRunning;
 	void Awake()
 	{
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
@@ -77,7 +75,6 @@ public class RoundManagerWithTime: MonoBehaviour {
 		rightContainer = rightScreen.transform.GetChild (0);	
 		userChoice = Sides.Null;
         isRoundStart = false;
-        roundRunning = false;
     }
 
     void Start()

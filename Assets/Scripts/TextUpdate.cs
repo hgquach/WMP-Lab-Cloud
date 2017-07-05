@@ -6,7 +6,6 @@ public class TextUpdate : MonoBehaviour {
 
 
 	private string baseLevel ="Level ";
-    private string baseTheme = "";
 	private TextMesh textMesh; 
 	void Awake()
 	{

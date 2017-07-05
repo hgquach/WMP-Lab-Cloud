@@ -37,11 +37,11 @@ public class RoundManagerTest: MonoBehaviour {
     // the color of the dots
 
     [SerializeField]
-    private Color dotColor;
+    public Color dotColor;
 	// not impelemented yet up a enum value that would determine the shape the dots are in
 	// a string that tells what kind of object to represent the dot like an actual white dot or a dinosaur 
     [SerializeField]
-	private string dotSprite;
+	public string dotSprite;
 	// maximum amount of dots allowed on the screen
     [SerializeField]
 	private int dotMax;
@@ -50,16 +50,22 @@ public class RoundManagerTest: MonoBehaviour {
 
     // keep a list of spawned dot gameobjects to iterate through to make filtering easier 
 	private List<GameObject> dotList = new List<GameObject>();
-    //private int for configuring dot separation
-    private int dotSeparation;
+    //int for configuring dot separation
+    public int dotSeparation;
     // private bools to symbolize when the round should start or not
     private bool isRoundStart;
     //private bool to determine if the session is timed
     public bool isTimed;
     // bool to check if the round is currently underway 
-    private bool roundRunning;
+    private int trialSoFar, correctSoFar;
+    private bool isTrialRunning;
+    public GameObject RecordingManager;
+    private RecordingManager recordingmanager;
+
+    public RatioStruct dotPerSide;
 	void Awake()
 	{
+        recordingmanager = RecordingManager.GetComponent<RecordingManager>();
 		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
 		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen");
         sessionManager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
@@ -71,7 +77,9 @@ public class RoundManagerTest: MonoBehaviour {
 		rightContainer = rightScreen.transform.GetChild (0);	
 		userChoice = Sides.Null;
         isRoundStart = false;
-        roundRunning = false;
+        this.isTrialRunning = false;
+        this.trialSoFar = 0;
+        this.correctSoFar = 0;
     }
 
 
@@ -131,6 +139,21 @@ public class RoundManagerTest: MonoBehaviour {
         return this.isRoundStart;
     }
 
+    public bool getTrialRunning()
+    {
+        return this.isTrialRunning;
+    }
+
+    public void setTrialRunning()
+    {
+        if(isTrialRunning)
+        {
+            this.isTrialRunning = false;
+            return;
+        }
+        this.isTrialRunning = true;
+    }
+
     public void roundStart()
     {
         if(!this.isRoundStart)
@@ -151,6 +174,20 @@ public class RoundManagerTest: MonoBehaviour {
         this.readyForUser = true;
     }
 
+    public int getTrialSoFar()
+    {
+        return this.trialSoFar;
+    }
+
+    public int getCorrectSoFar()
+    {
+        return this.correctSoFar;
+    }
+
+    public void incCorrectSoFar()
+    {
+        this.correctSoFar++;
+    }
     private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int separation ,int amount , Color objectColor,Sides side)
 	{
 
@@ -237,9 +274,11 @@ public class RoundManagerTest: MonoBehaviour {
 
 	private bool _checkAnswer(Sides correctAnswer ,Sides userChoice)
 	{
-		if (correctAnswer == userChoice)
-			return true;
-		
+        if (correctAnswer == userChoice)
+        {
+            this.correctSoFar++;
+            return true;
+        }
 		return false;
 	}
 
@@ -301,7 +340,7 @@ public class RoundManagerTest: MonoBehaviour {
 
 	public void displayResult()
 	{
-
+        this.recordingmanager.StopRecording();
 		_clearDot (this.leftContainer, this.rightContainer);	
 		this.readyForUser = false;
 		if (_checkAnswer (this.CorrectAnswer, this.userChoice)) {
@@ -330,7 +369,7 @@ public class RoundManagerTest: MonoBehaviour {
 	{
 
         _clearGameObjectList(this.dotList);
-		RatioStruct dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
+		this.dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
         yield return new WaitForSeconds(1.5f);
         this._addDivider();
         yield return new WaitForSeconds(.5f);
@@ -338,6 +377,8 @@ public class RoundManagerTest: MonoBehaviour {
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
+        this.trialSoFar++;
+        this.recordingmanager.StartRecording();
 	}
 
     public void waitAndStartTrial()

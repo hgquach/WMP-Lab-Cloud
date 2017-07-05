@@ -14,85 +14,110 @@ public static class FileIO{
     {
         List<LevelStruct> levelList = new List<LevelStruct>();
         int lineNum = 0;
-        string path = "Assets/Resources/" + filename;
+        //string path = Application.dataPath+"Resources/" + filename;
         Debug.Log("Loading file");
-        string line;
-        try
+        TextAsset levelFile= Resources.Load(filename) as TextAsset;
+        string[] splitLevelFile = levelFile.text.Split("\n"[0]);
+        foreach(string levelInfo in splitLevelFile)
         {
-            StreamReader reader = new StreamReader(path);
-            using (reader)
+            if(lineNum != 0)
             {
-                do
-                {
-                    Debug.Log("reading files");
-                    line = reader.ReadLine();
-                    if (lineNum != 0 && line!= null)
-                    {
-                        LevelStruct level;
-                        line = line.Replace("/r", "").Replace("/n", "");
-                        Debug.Log("this is the level line: " + line);
-                        string[] levelInfo = line.Split(',');
-                        foreach (string s in levelInfo)
-                        {
-                            Debug.Log(s);
-                        }
-                        RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
-                        level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), int.Parse(levelInfo[2]), levelRatio, int.Parse(levelInfo[4]));
-                        levelList.Add(level);
-                    }
-                    lineNum++;
-                }   
-                while (line != null);
-                reader.Close();
+                LevelStruct level;
+                string[] individualLevelInfo = levelInfo.Split(","[0]);
+                RatioStruct levelRatio = new RatioStruct(int.Parse(individualLevelInfo[3].Split('/')[0]), int.Parse(individualLevelInfo[3].Split('/')[1]));
+                level = new LevelStruct(int.Parse(individualLevelInfo[0]), int.Parse(individualLevelInfo[1]), int.Parse(individualLevelInfo[2]), levelRatio, int.Parse(individualLevelInfo[4]));
+                levelList.Add(level);
             }
-            Debug.Log(levelList.Count);
+            lineNum++;
+        }
+        //try
+        //{
+        //    StreamReader reader = new StreamReader(path);
+        //    using (reader)
+        //    {
+        //        do
+        //        {
+        //            Debug.Log("reading files");
+        //            line = reader.ReadLine();
+        //            if (lineNum != 0 && line!= null)
+        //            {
+        //                LevelStruct level;
+        //                line = line.Replace("/r", "").Replace("/n", "");
+        //                Debug.Log("this is the level line: " + line);
+        //                string[] levelInfo = line.Split(',');
+        //                foreach (string s in levelInfo)
+        //                {
+        //                    Debug.Log(s);
+        //                }
+        //                RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
+        //                level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), int.Parse(levelInfo[2]), levelRatio, int.Parse(levelInfo[4]));
+        //                levelList.Add(level);
+        //            }
+        //            lineNum++;
+        //        }   
+        //        while (line != null);
+        //        reader.Close();
+        //    }
+        //    Debug.Log(levelList.Count);
             return levelList;
-        }
-        catch(IOException e)
-        {
-            Debug.Log(e);
-        }
-        return levelList;
+        //}
+        //catch(IOException e)
+        //{
+        //    Debug.Log(e);
+        //}
+        //return levelList;
     }
     static public Dictionary<string , ThemeStruct> readThemeFile(string filename)
     {
         Regex regExpression = new Regex(@"\w+|(\(?\d\,?\)?\/?)+",RegexOptions.IgnoreCase);
         Dictionary<string, ThemeStruct> themeDict = new Dictionary<string, ThemeStruct>();
         int lineNum = 0;
-        string line;
-        string path = "Assets/Resources/" + filename;
-        //Debug.Log("Loading file");
-        try
+        TextAsset themeFile = Resources.Load(filename) as TextAsset;
+        string[] splitThemeFile = themeFile.text.Split("\n"[0]);
+        foreach (string line in splitThemeFile)
         {
-            StreamReader reader = new StreamReader(path);
-            using (reader)
+            //Debug.Log(line);
+            if (lineNum != 0)
             {
-                do
-                {
-                    //Debug.Log("reading file");
-                    line = reader.ReadLine();
-                    if (lineNum != 0 && line != null)
-                    {
-                        line = line.Trim();
-                        //print("this is the level line: " + line);
-                        MatchCollection matches = regExpression.Matches(line);
-                        List<Color> themeColorList = readColorRange(matches[3].Value);
-                        themeDict.Add(matches[0].Value,new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,bgImg : matches[3].Value));
-
-
-
-
-                    }
-                    lineNum++;
-                }
-                while (line != null);
+                line.Trim();
+                MatchCollection matches = regExpression.Matches(line);
+                List<Color> themeColorList = readColorRange(matches[3].Value);
+                themeDict.Add(matches[0].Value,new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,bgImg : matches[3].Value));
             }
-            return themeDict;
+            lineNum++;
         }
-        catch (IOException e)
-        {
-            Debug.Log(e);
-        }
+        //Debug.Log("Loading file");
+        //try
+        //{
+        //    StreamReader reader = new StreamReader(path);
+        //    using (reader)
+        //    {
+        //        do
+        //        {
+        //            //Debug.Log("reading file");
+        //            line = reader.ReadLine();
+        //            if (lineNum != 0 && line != null)
+        //            {
+        //                line = line.Trim();
+        //                //print("this is the level line: " + line);
+        //                MatchCollection matches = regExpression.Matches(line);
+        //                List<Color> themeColorList = readColorRange(matches[3].Value);
+        //                themeDict.Add(matches[0].Value,new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,bgImg : matches[3].Value));
+
+
+
+
+        //            }
+        //            lineNum++;
+        //        }
+        //        while (line != null);
+        //    }
+        //    return themeDict;
+        //}
+        //catch (IOException e)
+        //{
+        //    Debug.Log(e);
+        //}
         return themeDict;
     }
     static private List<Color> readColorRange(string colorRangestring)
@@ -115,21 +140,27 @@ public static class FileIO{
     }
     static public void writeTrialData(TrialStruct trialInfo)
     {
-        string Filename = "TestOutput.txt";
+        string Filename = Application.persistentDataPath +"/TestOutput.txt";
+        Debug.Log("this is where the data is being saved: "+Application.persistentDataPath);
         StreamWriter writer;
-        if (File.Exists(Filename))
+        if (!File.Exists(Filename))
         {
-            using (writer = new StreamWriter(Filename))
+            using (writer = new StreamWriter(Filename, true))
             {
-                writer.WriteLine(trialInfo.ToString());
+                writer.WriteLine("TaskName,PartcipantId, Session, RoundNumber,Level," +
+        "accuracy,ReactionTime, Response, sizeLeftCloud,sizeRightCloud,color,Seperation,AndroidOSVersion," +
+        "GameVersion,TimeElasped");
             }
         }
         else
         {
-            writer = File.CreateText("TestOutput.txt");
-            writer.WriteLine(trialInfo.ToString());
+            using (writer = new StreamWriter(Filename, true))
+            {
+                writer.WriteLine(trialInfo.ToString());
+            }
         }
-        writer.Close();
+    
+
     }
 
 

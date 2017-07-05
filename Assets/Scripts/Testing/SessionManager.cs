@@ -6,12 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class SessionManager : MonoBehaviour {
 
-    // 		this.dotRatio = new RatioStruct(2,3);
-    //this.dotColor= Color.blue;
-    //this.trialMax = 10;
-    //this.dotSprite = "WhiteDot";
-    //this.dotMax = 50;
-    //      this.dotSeparation = 1;
+
     TextUpdate textupdate;
     RoundManagerTest roundManager;
     Timer timer;
@@ -25,26 +20,34 @@ public class SessionManager : MonoBehaviour {
     [SerializeField]
     private int currentRound;
     [SerializeField]
+    public float timeRoundstart;
+    [SerializeField]
     private int currentLevel;
+    public ThemeStruct roundTheme;
+    public LevelStruct roundLevel;
+    [SerializeField]
+    private float roundAccuracy;
     void Awake()
     {
+        this.isTimedSession = GameData.gamedata.trialData.isRoundTimed;
         roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
         textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
 
         this.currentRound = 1;
-        this.currentLevel = 0;
-        this.maxRound = 3;
-
-        this.timeLimit = 120f;
-        this.isTimedSession = false; 
-        if (this.isTimedSession)
+        this.currentLevel = 1;
+        if (!this.isTimedSession)
         {
+            this.maxRound = GameData.gamedata.trialData.RoundLimit;
+        }
+        else
+        {
+            this.timeLimit = GameData.gamedata.trialData.RoundLimit * 60f;
             GameObject timerObject = (GameObject)Instantiate(Resources.Load("Timer"));
             timer = timerObject.GetComponent<Timer>();
             timer.setTimeLeft(this.timeLimit);
             roundManager.isTimed = true;
-
         }
+        this.roundAccuracy = 1;
 
     }
 
@@ -52,26 +55,40 @@ public class SessionManager : MonoBehaviour {
     {
         if (!roundManager.getRoundStart())
         {
-            ThemeStruct roundTheme = GameData.gamedata.sessionTheme["WoodLand"];
-            LevelStruct roundLevel = GameData.gamedata.sessionLevels[0];
+            roundAccuracy = roundManager.getCorrectSoFar() == 0 ? .6f : (float)roundManager.getCorrectSoFar() / (float)roundManager.getTrialSoFar();
+            this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count, this.currentLevel, roundAccuracy);
+            int adjustLevel = this.currentLevel - 1;
+            roundLevel = GameData.gamedata.sessionLevels[adjustLevel];
+            roundTheme = GameData.gamedata.sessionTheme["WoodLand"];
             if (this.isTimedSession)
             {
                 if (!timer.CheckTime())
                 {
-                    this.createNumberOfRounds(this.currentRound, this.maxRound,roundLevel,roundTheme);
+                    this.timeRoundstart = Time.time;
+                    this.createNumberOfRounds(this.currentRound, this.maxRound, roundLevel, roundTheme);
                 }
                 else
                 {
+                    // temporary until end scene is figured out
                     SceneManager.LoadScene(0);
                 }
             }
             else
             {
-                this.createNumberOfRounds(this.currentRound, this.maxRound , roundLevel,roundTheme);
+                this.createNumberOfRounds(this.currentRound, this.maxRound, roundLevel, roundTheme);
             }
         }
     }
 
+    public int getCurrentRound()
+    {
+        return this.currentRound;
+    }
+
+    public int getCurrentLevel()
+    {
+        return this.currentLevel;
+    }
     private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 2)
     {
         Debug.Log("dot color should be: " + color);
@@ -116,6 +133,28 @@ public class SessionManager : MonoBehaviour {
         {
             Debug.Log("Session over");
         }
+    }
+
+    private int levelChange(int levelLength, int currentLevel ,  float accuracy)
+    {
+        if(accuracy > .75f)
+        {
+            if ( (currentLevel + 1) <= levelLength)
+            {
+                currentLevel++;
+            }
+        }
+        else if ( currentLevel <= .5f)
+        {
+            if((currentLevel- 1) > 0)
+            {
+                currentLevel--;
+            }
+        }
+        return currentLevel;
+
+
+
     }
     /* used to update the round manager for timed sessions
     private void createTimeLimitRounds(float timeLeft)
