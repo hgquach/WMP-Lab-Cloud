@@ -9,17 +9,15 @@ using Random = UnityEngine.Random;
 public struct ThemeStruct
 {
     public string levelName,dotShape;
-    public Color backgroundColor;
     public string backgroundImage;
     public List<Color> dotColorRange;
     // distractor opition 
 
-    public ThemeStruct(string name , string shape , List<Color> colorRange,Color bgColor = default(Color), string bgImg = "none")
+    public ThemeStruct(string name , string shape , List<Color> colorRange, string bgImg = "none")
     {
         this.backgroundImage = bgImg;
         this.levelName = name;
         this.dotShape = shape;
-        this.backgroundColor = bgColor;
         this.dotColorRange = colorRange;
     }
 

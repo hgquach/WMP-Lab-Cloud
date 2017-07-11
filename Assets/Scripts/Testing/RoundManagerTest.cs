@@ -12,8 +12,7 @@ public class RoundManagerTest: MonoBehaviour {
 	Transform rightContainer;
 	Vector2 leftSidePos;
 	Vector2 rightSidePos;
-
-
+    private RecordingManager recordingmanager;
     // holds the manager that updates the  round manager with information to create trials
     SessionManager sessionManager;
     // hold the line renderer that draws the line down the middle of the screen
@@ -24,7 +23,7 @@ public class RoundManagerTest: MonoBehaviour {
 	// use to determine the user choice and correct choice
 	// might change userChoice to private 2 lazy to create setter rn
 	public Sides userChoice; 
-	private Sides CorrectAnswer;
+    public Sides CorrectAnswer;
 
 	// max trial amount before moving onto another round 
 	private int trialMax;
@@ -58,9 +57,9 @@ public class RoundManagerTest: MonoBehaviour {
     public bool isTimed;
     // bool to check if the round is currently underway 
     private int trialSoFar, correctSoFar;
+    public float accuracySoFar = .6f;
     private bool isTrialRunning;
     public GameObject RecordingManager;
-    private RecordingManager recordingmanager;
 
     public RatioStruct dotPerSide;
 	void Awake()
@@ -210,7 +209,7 @@ public class RoundManagerTest: MonoBehaviour {
 	private void _spawnDot(Transform container,string obj, int separation ,int amount, Vector2 sideScale , Color objectColor)	
 	{
 		GameObject spawnDot;
-		GameObject dot = Resources.Load (obj) as GameObject;
+		GameObject dot = Resources.Load ("DotSprite/"+obj) as GameObject;
 		Vector2 circlePos;
 		Vector2 dotPos;
 		for(int i = 0 ; i < amount ; i++)
@@ -272,11 +271,10 @@ public class RoundManagerTest: MonoBehaviour {
 		}
 	}
 
-	private bool _checkAnswer(Sides correctAnswer ,Sides userChoice)
+	public bool _checkAnswer(Sides correctAnswer ,Sides userChoice)
 	{
         if (correctAnswer == userChoice)
         {
-            this.correctSoFar++;
             return true;
         }
 		return false;
@@ -344,6 +342,7 @@ public class RoundManagerTest: MonoBehaviour {
 		_clearDot (this.leftContainer, this.rightContainer);	
 		this.readyForUser = false;
 		if (_checkAnswer (this.CorrectAnswer, this.userChoice)) {
+            this.incCorrectSoFar();
 			GameObject result = Resources.Load ("correct1") as GameObject;
 			GameObject spawnedResult =Instantiate (result, new Vector2(0,0), Quaternion.identity);
 			StartCoroutine(waitAndDelete (spawnedResult));
@@ -359,6 +358,8 @@ public class RoundManagerTest: MonoBehaviour {
 
 	private IEnumerator waitAndDelete(GameObject resultSprite)
 	{
+        this.accuracySoFar= this.getCorrectSoFar() == 0 ? .6f : (float)this.getCorrectSoFar() / (float)this.getTrialSoFar();
+        this.trialSoFar++;
         this.removeDivider();
 		yield return new WaitForSeconds (.5f);
 		Destroy (resultSprite);
@@ -377,7 +378,6 @@ public class RoundManagerTest: MonoBehaviour {
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
 		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
-        this.trialSoFar++;
         this.recordingmanager.StartRecording();
 	}
 
@@ -392,7 +392,6 @@ public class RoundManagerTest: MonoBehaviour {
 		}
 		else
         {
-            Debug.Log("round is over");
             this.removeDivider();
             this.isRoundStart = false;
             sessionManager.incRound();

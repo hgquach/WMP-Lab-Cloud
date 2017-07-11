@@ -9,6 +9,7 @@ public class SessionManager : MonoBehaviour {
 
     TextUpdate textupdate;
     RoundManagerTest roundManager;
+    SpriteRenderer background;
     Timer timer;
     [SerializeField]
     private bool isTimedSession;
@@ -26,51 +27,66 @@ public class SessionManager : MonoBehaviour {
     public ThemeStruct roundTheme;
     public LevelStruct roundLevel;
     [SerializeField]
-    private float roundAccuracy;
     void Awake()
     {
         this.isTimedSession = GameData.gamedata.trialData.isRoundTimed;
-        roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
-        textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
-
+        this.roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
+        this.textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
+        this.background = GameObject.FindGameObjectWithTag("BackgroundCamera").GetComponentInChildren<SpriteRenderer>();
         this.currentRound = 1;
-        this.currentLevel = 1;
+        this.currentLevel = (GameData.gamedata.trialData.Level == 0) ? 1 : GameData.gamedata.trialData.Level;
+        this.roundTheme = GameData.gamedata.sessionTheme["Moon"];
+
+        background.sprite = Resources.Load<Sprite>("Background/"+this.roundTheme.backgroundImage);
         if (!this.isTimedSession)
         {
-            this.maxRound = GameData.gamedata.trialData.RoundLimit;
+            if (GameData.gamedata.trialData.RoundLimit != 0)
+            {
+                this.maxRound = GameData.gamedata.trialData.RoundLimit;
+            }
+            else
+            {
+                GameData.gamedata.trialData.RoundLimit = 3;
+                this.maxRound = 3;
+            }
         }
         else
         {
-            this.timeLimit = GameData.gamedata.trialData.RoundLimit * 60f;
+            if(GameData.gamedata.trialData.RoundLimit != 0)
+            {
+                this.timeLimit = (float)GameData.gamedata.trialData.RoundLimit;
+            }
+            else
+            {
+                GameData.gamedata.trialData.RoundLimit = 120;
+                this.timeLimit = 120f;
+            }
             GameObject timerObject = (GameObject)Instantiate(Resources.Load("Timer"));
             timer = timerObject.GetComponent<Timer>();
             timer.setTimeLeft(this.timeLimit);
             roundManager.isTimed = true;
         }
-        this.roundAccuracy = 1;
-
     }
 
     void Update()
     {
+        Debug.Log("current level is: " + currentLevel);
+        Debug.Log(string.Format("{0}correct so far {1} trials so far", roundManager.getCorrectSoFar(),roundManager.getTrialSoFar()));
         if (!roundManager.getRoundStart())
         {
-            roundAccuracy = roundManager.getCorrectSoFar() == 0 ? .6f : (float)roundManager.getCorrectSoFar() / (float)roundManager.getTrialSoFar();
-            this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count, this.currentLevel, roundAccuracy);
+            this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count, this.currentLevel, roundManager.accuracySoFar);
             int adjustLevel = this.currentLevel - 1;
             roundLevel = GameData.gamedata.sessionLevels[adjustLevel];
-            roundTheme = GameData.gamedata.sessionTheme["WoodLand"];
             if (this.isTimedSession)
             {
                 if (!timer.CheckTime())
                 {
                     this.timeRoundstart = Time.time;
-                    this.createNumberOfRounds(this.currentRound, this.maxRound, roundLevel, roundTheme);
+                    this.createTimeLimitRounds(this.roundLevel,this.roundTheme);
                 }
                 else
                 {
-                    // temporary until end scene is figured out
-                    SceneManager.LoadScene(0);
+                    this.EndSession();
                 }
             }
             else
@@ -131,7 +147,7 @@ public class SessionManager : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Session over");
+          this.EndSession();
         }
     }
 
@@ -144,30 +160,36 @@ public class SessionManager : MonoBehaviour {
                 currentLevel++;
             }
         }
-        else if ( currentLevel <= .5f)
+        else if ( accuracy <= .5f)
         {
-            if((currentLevel- 1) > 0)
+            if((currentLevel- 1) >= 0)
             {
                 currentLevel--;
             }
         }
+        Debug.Log("this is the current level: " + currentLevel);
         return currentLevel;
 
 
 
     }
-    /* used to update the round manager for timed sessions
-    private void createTimeLimitRounds(float timeLeft)
-    {
 
-            // this is all temp
-            LevelStruct tempLevel = levelArray[this.currentLevel];
-            ThemeStruct tempTheme = themeArray[0];
+    private void createTimeLimitRounds(LevelStruct currentLevel , ThemeStruct roundTheme)
+    {
+            LevelStruct tempLevel = currentLevel;
+            ThemeStruct tempTheme = roundTheme;
             this.UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), tempLevel.trialMax, tempTheme.dotShape, tempLevel.dotMax, tempLevel.spread);
             StartCoroutine(this.waitDisplay(tempLevel.levelNum, tempTheme.levelName));
             roundManager.roundStart();
 
         
     }
-    */
+
+    private void EndSession()
+    {
+        GameData.gamedata.playerPref.Level = this.currentLevel;
+        GameData.gamedata.playerPref.Theme = this.roundTheme.levelName;
+        FileIO.createPrefFile(GameData.gamedata.playerPref,int.Parse(GameData.gamedata.trialData.PartcipantId));
+        SceneManager.LoadScene(0);
+    }
 }

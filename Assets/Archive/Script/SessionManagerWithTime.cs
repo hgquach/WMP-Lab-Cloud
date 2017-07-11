@@ -35,7 +35,7 @@ public class SceneManagerWithTimes : MonoBehaviour {
         levelArray[0] = new LevelStruct(1,10,1,new RatioStruct(1,3));
         levelArray[1] = new LevelStruct(2,50,1,new RatioStruct(3,4));
 
-        themeArray[0] = new ThemeStruct("WoodLand","star",new List<Color> { Color.white,Color.blue,Color.yellow,Color.red},Color.black);
+        //themeArray[0] = new ThemeStruct("WoodLand","star",new List<Color> { Color.white,Color.blue,Color.yellow,Color.red},Color.black);
         this.currentRound = 1;
         this.currentLevel = 0;
         this.maxRound = 3;

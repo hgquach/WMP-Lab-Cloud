@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 public struct TrialStruct
 {
-    public string TaskName, PartcipantId, Session, Theme,Response,GameVersion,AndroidOSVersion,accuracy
+    public string TaskName, PartcipantId, Theme,Response,GameVersion,AndroidOSVersion,accuracy
         ,ScreenReso,Date,Dot;
-    public int RoundNumber, Level , sizeLeftCloud , sizeRightCloud,RoundLimit;
+    public int RoundNumber, Level , sizeLeftCloud , sizeRightCloud,RoundLimit,Session;
     public float ReactionTime,TimeElasped;
     public Color color;
     public bool isRoundTimed;
 
-    public TrialStruct( string TaskName, string PartcipantId, string Session, string Theme,string Response,string GameVersion,
+    public TrialStruct( string TaskName, string PartcipantId, int Session, string Theme,string Response,string GameVersion,
         string AndroidOSVersion,string Screen , string date,string dot,
      int RoundNumber, int Level , int sizeLeftCloud , int sizeRightCloud,
      float ReactionTime,float TimeElasped, string accuracy,
@@ -40,9 +40,9 @@ public struct TrialStruct
 
     public override string ToString()
     {
-        return TaskName +","+ PartcipantId +","+ Session+","+ScreenReso+","+isRoundTimed+","+RoundLimit+","+Date+","+Dot+"," + RoundNumber.ToString()+"," + Level.ToString()+"," +
+        return TaskName +","+ PartcipantId +","+ Session.ToString()+","+ScreenReso+","+isRoundTimed+","+RoundLimit+","+Date+","+Dot+"," + RoundNumber.ToString()+"," + Level.ToString()+"," +
         accuracy +","+ ReactionTime.ToString()+"," + Response+"," + sizeLeftCloud.ToString()+"," + sizeRightCloud.ToString()+"," +
-        color.ToString()+"," + AndroidOSVersion+"," + GameVersion+"," + TimeElasped.ToString()+"\n";
+        color.ToString()+"," + AndroidOSVersion+"," + GameVersion+"," + TimeElasped.ToString()+"\r\n";
     }
 
 

@@ -22,9 +22,8 @@ public class RecordingManager : MonoBehaviour
         //not sure how theme selection works 
         //GameData.gamedata.trialData.Theme = sessionmanager.gettheme()
         GameData.gamedata.trialData.ScreenReso = Screen.currentResolution.ToString();
-        GameData.gamedata.trialData.Date = System.DateTime.Now.ToString();
+        GameData.gamedata.trialData.Date = System.DateTime.Now.ToString("yyyy-MM-dd");
         GameData.gamedata.trialData.Dot = roundmanager.dotSprite;
-        GameData.gamedata.trialData.accuracy = roundmanager.getCorrectSoFar() + "/" + roundmanager.getTrialSoFar();
         GameData.gamedata.trialData.Response = roundmanager.userChoice.ToString();
         GameData.gamedata.trialData.sizeLeftCloud = roundmanager.dotPerSide.cloud1;
         GameData.gamedata.trialData.sizeRightCloud = roundmanager.dotPerSide.cloud2;
@@ -36,6 +35,7 @@ public class RecordingManager : MonoBehaviour
     public void StopRecording()
     {
         this.trialEndTime = Time.time;
+        GameData.gamedata.trialData.accuracy = roundmanager._checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice).ToString();
         GameData.gamedata.trialData.ReactionTime = this.trialEndTime - this.trialStartTime;
         GameData.gamedata.trialData.TimeElasped = Time.time - sessionmanager.timeRoundstart;
         FileIO.writeTrialData(GameData.gamedata.trialData);
