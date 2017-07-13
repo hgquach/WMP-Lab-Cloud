@@ -20,10 +20,15 @@ public class TouchInput : MonoBehaviour {
 
 		if (roundManager.isReadyForUser () && roundManager.getRoundStart()) 
 		{
-			if (Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) {
-				//Debug.Log ("current session: " + roundManager.getCurrentSession());
+			if (Input.touchCount == 1 && Input.GetTouch (0).phase == TouchPhase.Began) {
 				Vector3 pos = Camera.main.ScreenToWorldPoint (Input.GetTouch (0).position);
-                if (rightScreen.bounds.Contains(pos))
+                if(roundManager.getIsDisplay())
+                {
+                    roundManager.feedbackText.hideText();
+                    roundManager.waitAndStartTrial();
+                }
+
+                else if (rightScreen.bounds.Contains(pos))
                 {
                     //Debug.Log ("inside right");
                     roundManager.userChoice = RoundManagerTest.Sides.Right;
@@ -32,7 +37,7 @@ public class TouchInput : MonoBehaviour {
 
                 }
 
-                if (leftScreen.bounds.Contains(pos))
+                else if (leftScreen.bounds.Contains(pos))
                 {
                     //Debug.Log ("inside left");
                     roundManager.userChoice = RoundManagerTest.Sides.Left;
@@ -40,19 +45,14 @@ public class TouchInput : MonoBehaviour {
                     roundManager.waitAndStartTrial();
                 }
 
-                //if (touchedCorner(pos,this.cornerArray))
-                //{
-                //    Debug.Log("you touched a corner");
-                //}
-
-
-
-//			Debug.Log ("touch world pos.x " + pos.x);
-//			Debug.Log ("touch world pos.y "+ pos.y);
-//			Debug.Log ("touch world pos.z "+ pos.z);
+                if(!this.roundManager.getTrialRunning())
+                {
+                    this.roundManager.setTrialRunning();
+                }
 			}
 		}
 
+        
 			
 	}
 }

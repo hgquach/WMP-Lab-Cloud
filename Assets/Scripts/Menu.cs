@@ -29,7 +29,6 @@ public class Menu : MonoBehaviour
     }
     public void playButton()
     {
-        Debug.Log(GameData.gamedata.trialData.PartcipantId);
         if (GameData.gamedata.trialData.PartcipantId != null)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
@@ -40,7 +39,12 @@ public class Menu : MonoBehaviour
         }
 
     }
-
+    public void demoButton()
+    {
+        GameData.gamedata.isDemo = true;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1); 
+        
+    }
     public void TLPressedDown()
     {
         this.TL = true;

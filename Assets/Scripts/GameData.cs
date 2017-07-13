@@ -11,6 +11,7 @@ public class GameData : MonoBehaviour {
     public TrialStruct trialData;
     public PreferanceStruct playerPref;
     public bool surveyToggled;
+    public bool isDemo;
 	// Use this for initialization
     void Awake()
     {
@@ -32,10 +33,7 @@ public class GameData : MonoBehaviour {
         {
             Destroy(gameObject);
         }
-        foreach(string k in sessionTheme.Keys)
-        {
-            print(k);
-        }
+
     }
 
     private void checkAndCreateFolders()

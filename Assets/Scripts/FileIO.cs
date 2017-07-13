@@ -140,26 +140,28 @@ public static class FileIO{
     }
     static public void writeTrialData(TrialStruct trialInfo)
     {
-        string baseName = GameData.gamedata.trialData.PartcipantId + "-" + GameData.gamedata.trialData.Session + "-" + GameData.gamedata.trialData.Date + ".txt";
+        string baseName = GameData.gamedata.trialData.PartcipantId + "-" + GameData.gamedata.trialData.Session + "-" + GameData.gamedata.trialData.Date + ".csv";
         string Filename = Path.Combine(Application.persistentDataPath, Path.Combine("Trials", baseName));
         StreamWriter writer;
-        if (!File.Exists(Filename))
+        if (!GameData.gamedata.isDemo)
         {
-            using (writer = new StreamWriter(Filename, true))
+            if (!File.Exists(Filename))
             {
-                writer.WriteLine("TaskName,PartcipantId, Session,Screen Resolution,Timed Session, Round Limit ,Date/Time," +
-                    "DotSprite,RoundNumber,Level," +"accuracy,ReactionTime, Response, sizeLeftCloud,sizeRightCloud,color,Seperation,AndroidOSVersion," +
-        "GameVersion,TimeElasped");
+                using (writer = new StreamWriter(Filename, true))
+                {
+                    writer.WriteLine("TaskName,PartcipantId, Session,Screen Resolution,Timed Session, Round Limit ,Date/Time," +
+                        "DotSprite,RoundNumber,Level," + "accuracy,ReactionTime, Response, sizeLeftCloud,sizeRightCloud,color,Seperation,AndroidOSVersion," +
+            "GameVersion,TimeElasped");
+                }
+            }
+            else
+            {
+                using (writer = new StreamWriter(Filename, true))
+                {
+                    writer.WriteLine(trialInfo.ToString());
+                }
             }
         }
-        else
-        {
-            using (writer = new StreamWriter(Filename, true))
-            {
-                writer.WriteLine(trialInfo.ToString());
-            }
-        }
-    
 
     }
     static public void checkAndCreatePrefFolder()

@@ -40,9 +40,12 @@ public struct TrialStruct
 
     public override string ToString()
     {
+        string colorStringAdjusted = this.color.ToString();
+        colorStringAdjusted = colorStringAdjusted.Replace(",","-");
+        Debug.Log(colorStringAdjusted);
         return TaskName +","+ PartcipantId +","+ Session.ToString()+","+ScreenReso+","+isRoundTimed+","+RoundLimit+","+Date+","+Dot+"," + RoundNumber.ToString()+"," + Level.ToString()+"," +
         accuracy +","+ ReactionTime.ToString()+"," + Response+"," + sizeLeftCloud.ToString()+"," + sizeRightCloud.ToString()+"," +
-        color.ToString()+"," + AndroidOSVersion+"," + GameVersion+"," + TimeElasped.ToString()+"\r\n";
+        colorStringAdjusted+"," + AndroidOSVersion+"," + GameVersion+"," + TimeElasped.ToString()+"\r\n";
     }
 
 

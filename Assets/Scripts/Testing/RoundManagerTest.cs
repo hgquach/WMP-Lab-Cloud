@@ -1,86 +1,72 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 using Random = UnityEngine.Random;
-public class RoundManagerTest: MonoBehaviour {
+public class RoundManagerTest : MonoBehaviour {
 
     // holding left and right side information
-	GameObject leftScreen;
-	GameObject rightScreen;
-	Transform leftContainer; 
-	Transform rightContainer;
-	Vector2 leftSidePos;
-	Vector2 rightSidePos;
+    // hold the line renderer that draws the line down the middle of the screen
+    GameObject leftScreen, rightScreen, sideDivider;
+    Transform leftContainer, rightContainer;
+    Vector2 leftSidePos, rightSidePos;
     private RecordingManager recordingmanager;
+    public TextUpdate feedbackText;
     // holds the manager that updates the  round manager with information to create trials
     SessionManager sessionManager;
-    // hold the line renderer that draws the line down the middle of the screen
-    GameObject sideDivider;
-	// used to make targeting left and right side easier
-	public enum Sides {Right,Left,Null};
+    // used to make targeting left and right side easier
+    public enum Sides { Right, Left, Null };
 
-	// use to determine the user choice and correct choice
-	// might change userChoice to private 2 lazy to create setter rn
-	public Sides userChoice; 
-    public Sides CorrectAnswer;
+    // use to determine the user choice and correct choice
+    // might change userChoice to private 2 lazy to create setter rn
+    public Sides userChoice, CorrectAnswer;
 
-	// max trial amount before moving onto another round 
-	private int trialMax;
-	// current trial the player is on
+    // max trial amount before moving onto another round 
+    private int trialMax;
+    // current trial the player is on
     [SerializeField]
-	private int currentTrial = 0;
-	// the dot ratio for dot randomization 
+    private int currentTrial = 0;
+    // the dot ratio for dot randomization 
     [SerializeField]
-	private RatioStruct dotRatio;
+    private RatioStruct dotRatio;
     // the color of the dots
 
     [SerializeField]
     public Color dotColor;
-	// not impelemented yet up a enum value that would determine the shape the dots are in
-	// a string that tells what kind of object to represent the dot like an actual white dot or a dinosaur 
+    // a string that tells what kind of object to represent the dot like an actual white dot or a dinosaur 
     [SerializeField]
-	public string dotSprite;
-	// maximum amount of dots allowed on the screen
+    public string dotSprite;
+    // maximum amount of dots allowed on the screen
     [SerializeField]
-	private int dotMax;
-	// make sure the user can only enter input is valid during certain periods
-	private bool readyForUser = true;
+    private int dotMax;
+    // make sure the user can only enter input is valid during certain periods
+    private bool readyForUser = true;
 
     // keep a list of spawned dot gameobjects to iterate through to make filtering easier 
-	private List<GameObject> dotList = new List<GameObject>();
+    private List<GameObject> dotList = new List<GameObject>();
     //int for configuring dot separation
     public int dotSeparation;
     // private bools to symbolize when the round should start or not
-    private bool isRoundStart;
-    //private bool to determine if the session is timed
+    // bool to determien if the feedback is being displayed
+    private bool isRoundStart, isDisplayFeedback;
+    //private bool to determine if the session is timed 
     public bool isTimed;
     // bool to check if the round is currently underway 
     private int trialSoFar, correctSoFar;
     public float accuracySoFar = .6f;
     private bool isTrialRunning;
     public GameObject RecordingManager;
-
+    public float totalReactionTime; 
     public RatioStruct dotPerSide;
+
+
+
+
 	void Awake()
 	{
-        recordingmanager = RecordingManager.GetComponent<RecordingManager>();
-		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
-		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen");
-        sessionManager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
-        sideDivider = GameObject.FindGameObjectWithTag("Divider");
-		rightSidePos = rightScreen.transform.position;
-		leftSidePos = leftScreen.transform.position;
-     
-		leftContainer = leftScreen.transform.GetChild (0);
-		rightContainer = rightScreen.transform.GetChild (0);	
-		userChoice = Sides.Null;
-        isRoundStart = false;
-        this.isTrialRunning = false;
-        this.trialSoFar = 0;
-        this.correctSoFar = 0;
+        this.Assignment();
     }
-
 
 	public bool isReadyForUser()
 	{
@@ -152,7 +138,16 @@ public class RoundManagerTest: MonoBehaviour {
         }
         this.isTrialRunning = true;
     }
+    
+    public bool getIsDisplay()
+    {
+        return this.isDisplayFeedback;
+    }
 
+    public void setDisplayFeedback()
+    {
+        this.isDisplayFeedback = this.isDisplayFeedback ? false : true;
+    }
     public void roundStart()
     {
         if(!this.isRoundStart)
@@ -187,6 +182,7 @@ public class RoundManagerTest: MonoBehaviour {
     {
         this.correctSoFar++;
     }
+
     private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int separation ,int amount , Color objectColor,Sides side)
 	{
 
@@ -271,7 +267,7 @@ public class RoundManagerTest: MonoBehaviour {
 		}
 	}
 
-	public bool _checkAnswer(Sides correctAnswer ,Sides userChoice)
+	public bool checkAnswer(Sides correctAnswer ,Sides userChoice)
 	{
         if (correctAnswer == userChoice)
         {
@@ -338,10 +334,10 @@ public class RoundManagerTest: MonoBehaviour {
 
 	public void displayResult()
 	{
+		this.readyForUser = false;
         this.recordingmanager.StopRecording();
 		_clearDot (this.leftContainer, this.rightContainer);	
-		this.readyForUser = false;
-		if (_checkAnswer (this.CorrectAnswer, this.userChoice)) {
+		if (checkAnswer (this.CorrectAnswer, this.userChoice)) {
             this.incCorrectSoFar();
 			GameObject result = Resources.Load ("correct1") as GameObject;
 			GameObject spawnedResult =Instantiate (result, new Vector2(0,0), Quaternion.identity);
@@ -361,39 +357,58 @@ public class RoundManagerTest: MonoBehaviour {
         this.accuracySoFar= this.getCorrectSoFar() == 0 ? .6f : (float)this.getCorrectSoFar() / (float)this.getTrialSoFar();
         this.trialSoFar++;
         this.removeDivider();
-		yield return new WaitForSeconds (.5f);
+		yield return new WaitForSecondsRealtime(1f);
 		Destroy (resultSprite);
+
 
 	}
 
     public IEnumerator createTrial()
 	{
-
         _clearGameObjectList(this.dotList);
 		this.dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSecondsRealtime(1.5f);
         this._addDivider();
-        yield return new WaitForSeconds(.5f);
-		this.readyForUser = true;
+        yield return new WaitForSecondsRealtime(.5f);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud1, this.dotColor, Sides.Left);
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
-		this.CorrectAnswer= _correctAnswer (dotPerSide.cloud1, dotPerSide.cloud2);
+        this.readyForUser = true;
         this.recordingmanager.StartRecording();
 	}
+
+    public IEnumerator displayFeedBack()
+    {
+        this.clearTrialScreen();
+        yield return new WaitForSecondsRealtime(1.5f);
+        this.isTrialRunning = false;
+        this.isDisplayFeedback = true;
+        this.feedbackText.updateFeedBack(this.accuracySoFar, totalReactionTime / this.trialSoFar);
+        this.feedbackText.displayText();
+        this.readyForUser = true;
+
+    }
 
     public void waitAndStartTrial()
 	{
 
 		//Debug.Log ("inside enumerator");
 		if (this.currentTrial <= this.trialMax) {
-
-            this.incCurrentTrial ();
-			StartCoroutine(this.createTrial ());
+            if(this.currentTrial % 8 == 0 && !this.isDisplayFeedback)
+            {
+                StartCoroutine(this.displayFeedBack());
+            }
+            else
+            {
+                this.isDisplayFeedback = false;
+                this.incCurrentTrial ();
+                StartCoroutine(this.createTrial ());
+            }
 		}
 		else
         {
             this.removeDivider();
             this.isRoundStart = false;
+            this.totalReactionTime = 0f;
             sessionManager.incRound();
 		}
 	}
@@ -462,5 +477,31 @@ public class RoundManagerTest: MonoBehaviour {
     private void _addDivider()
     {
         sideDivider.GetComponent<LineRenderer>().enabled = true;
+    }
+
+    private void Assignment()
+    {
+
+        recordingmanager = RecordingManager.GetComponent<RecordingManager>();
+		leftScreen = GameObject.FindGameObjectWithTag ("LeftScreen");
+		rightScreen = GameObject.FindGameObjectWithTag ("RightScreen");
+        sessionManager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
+        sideDivider = GameObject.FindGameObjectWithTag("Divider");
+		rightSidePos = rightScreen.transform.position;
+		leftSidePos = leftScreen.transform.position;
+        this.feedbackText = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
+		leftContainer = leftScreen.transform.GetChild (0);
+		rightContainer = rightScreen.transform.GetChild (0);	
+		userChoice = Sides.Null;
+        this.isRoundStart = false;
+        this.isTrialRunning = false;
+        this.trialSoFar = 0;
+        this.correctSoFar = 0;
+    }
+
+    public void clearTrialScreen()
+    {
+        this._clearGameObjectList(this.dotList);
+        this.removeDivider();
     }
 }

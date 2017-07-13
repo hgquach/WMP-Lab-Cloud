@@ -92,9 +92,9 @@ public class SceneManagerWithTimes : MonoBehaviour {
     {
         yield return new WaitForSeconds(.5f);
         textupdate.updateRoundTitle(level, themeName);
-        textupdate.displayTitle();
+        textupdate.displayText();
         yield return new WaitForSeconds(.5f);
-        textupdate.hideTitle();
+        textupdate.hideText();
     }
 
     private void createNumberOfRounds(int currentRound , int maxRound)

@@ -35,8 +35,9 @@ public class RecordingManager : MonoBehaviour
     public void StopRecording()
     {
         this.trialEndTime = Time.time;
-        GameData.gamedata.trialData.accuracy = roundmanager._checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice).ToString();
+        GameData.gamedata.trialData.accuracy = roundmanager.checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice).ToString();
         GameData.gamedata.trialData.ReactionTime = this.trialEndTime - this.trialStartTime;
+        roundmanager.totalReactionTime += this.trialEndTime = this.trialStartTime;
         GameData.gamedata.trialData.TimeElasped = Time.time - sessionmanager.timeRoundstart;
         FileIO.writeTrialData(GameData.gamedata.trialData);
     }

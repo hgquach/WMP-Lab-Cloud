@@ -19,12 +19,18 @@ public class TextUpdate : MonoBehaviour {
 
     }
 
-    public void displayTitle()
+    public void updateFeedBack(float accuracy , float avgReactionTime)
+    {
+        textMesh.text = "Accuracy So Far: " + accuracy.ToString("F2") + "\n" +
+            "Average Reaction Time: " + avgReactionTime.ToString("F2");
+    }
+
+    public void displayText()
     {
         this.GetComponent<MeshRenderer>().enabled = true;
     }
 
-    public void hideTitle()
+    public void hideText()
     {
         this.GetComponent<MeshRenderer>().enabled = false;
     }
