@@ -67,16 +67,18 @@ public static class FileIO{
         //}
         //return levelList;
     }
+
     static public Dictionary<string , ThemeStruct> readThemeFile(string filename)
     {
         Regex regExpression = new Regex(@"\w+|(\(?\d\,?\)?\/?)+",RegexOptions.IgnoreCase);
         Dictionary<string, ThemeStruct> themeDict = new Dictionary<string, ThemeStruct>();
         int lineNum = 0;
         TextAsset themeFile = Resources.Load(filename) as TextAsset;
-        string[] splitThemeFile = themeFile.text.Split("\n"[0]);
+        string[] splitThemeFile = themeFile.text.Split(new[] { '\r','\n'},System.StringSplitOptions.RemoveEmptyEntries);
         foreach (string line in splitThemeFile)
         {
-            //Debug.Log(line);
+
+           // Debug.Log(line);
             if (lineNum != 0)
             {
                 line.Trim();
@@ -120,6 +122,7 @@ public static class FileIO{
         //}
         return themeDict;
     }
+
     static private List<Color> readColorRange(string colorRangestring)
     {
         List<Color> colorList = new List<Color>();
@@ -138,6 +141,7 @@ public static class FileIO{
 
         return colorList; 
     }
+
     static public void writeTrialData(TrialStruct trialInfo)
     {
         string baseName = GameData.gamedata.trialData.PartcipantId + "-" + GameData.gamedata.trialData.Session + "-" + GameData.gamedata.trialData.Date + ".csv";
@@ -164,6 +168,25 @@ public static class FileIO{
         }
 
     }
+
+    static public void writeSurveyResponse(string responseString)
+    {
+        string baseName = GameData.gamedata.trialData.PartcipantId + "-" + GameData.gamedata.trialData.Session + "-" + GameData.gamedata.trialData.Date + ".csv";
+        string Filename = Path.Combine(Application.persistentDataPath, Path.Combine("Trials", baseName));
+
+        if (!GameData.gamedata.isDemo)
+        {
+            if(File.Exists(Filename))
+            {
+                using (StreamWriter writer = new StreamWriter(Filename,true))
+                {
+                    writer.WriteLine(responseString);
+                }
+            }
+        }
+
+    }
+
     static public void checkAndCreatePrefFolder()
     {
         string pathway = Path.Combine(Application.persistentDataPath, "Preferences");
@@ -178,6 +201,7 @@ public static class FileIO{
             //Debug.Log("folder exist");
         }
     }
+
     static public void checkAndCreateTrialFolder()
     {
         string pathway = Path.Combine(Application.persistentDataPath, "Trials");
@@ -192,7 +216,31 @@ public static class FileIO{
             //Debug.Log("folder exist");
         }
     }
+
+    static public void checkandCreateCurrentPrefFile()
+    {
+        string pathway = Path.Combine(Application.persistentDataPath, Path.Combine("Preferences", "CurrentPref.txt"));
+        if (!File.Exists(pathway))
+        {
+            File.Create(pathway);
+            GameData.gamedata.haveCurrentPref = false;
+        }
+        else
+        {
+            
+            string currentParticipantID;
+            currentParticipantID = readCurrentPref(pathway);
+            if (currentParticipantID != "" && currentParticipantID != null)
+            {
+                string prefFilePathway = Path.Combine(Application.persistentDataPath, Path.Combine("Preferences", currentParticipantID+".csv"));
+                GameData.gamedata.trialData.PartcipantId = currentParticipantID;
+                GameData.gamedata.playerPref = readPrefFile(prefFilePathway);
+                GameData.gamedata.haveCurrentPref = true;
+            }
+        }
+    }
     // all these function assume that the Preference directory exists
+
     static public PreferanceStruct readPrefFile(string filePathway)
     {
         PreferanceStruct playerPref  = new PreferanceStruct();
@@ -224,17 +272,19 @@ public static class FileIO{
         }
         return playerPref;
     }
+
     static public void createPrefFile(PreferanceStruct pref , int participantID)
     {
         StreamWriter writer;
         string filePath = Path.Combine(Application.persistentDataPath , Path.Combine(@"Preferences" ,participantID+".csv"));
-        Debug.Log("this is where the file are saved: " + filePath);
+        //Debug.Log("this is where the file are saved: " + filePath);
         using (writer = new StreamWriter(filePath, false))
         {
             writer.WriteLine("SessionNumber,Level,RoundLimit,Theme,IsTimed,SurveyQuestion");
             writer.WriteLine(pref.ToString());
         }
     }
+
     static private PreferanceStruct setPlayerPref(string[] prefInfo, PreferanceStruct playerPref)
     {
         playerPref.SessionNumber = int.Parse(prefInfo[0]);
@@ -244,6 +294,47 @@ public static class FileIO{
         playerPref.RoundLimit = int.Parse(prefInfo[2]);
         playerPref.SurveyQuestion = bool.Parse(prefInfo[5]);
         return playerPref;
+    }
+
+    // read and write to the current pref file
+
+    static public string readCurrentPref(string filepathway)
+    {
+        string line ="";
+        try
+        {
+            StreamReader reader = new StreamReader(filepathway);
+            using (reader)
+            {
+                line = reader.ReadLine();
+                if (line != null)
+                {
+                    line.Replace("\n", "").Replace("\r", "");
+                    if (line != null)
+                    {
+                        return line;
+                    }
+                }
+
+            }
+        }
+
+        catch(IOException e)
+        {
+            Debug.Log(e);
+        }
+
+        return line;
+    }
+
+    static public void writeCurrentPref(string participantID)
+    {
+        StreamWriter writer;
+        string filePath = Path.Combine(Application.persistentDataPath, Path.Combine("Preferences", "CurrentPref.txt"));
+        using (writer = new StreamWriter(filePath, false))
+        {
+            writer.WriteLine(participantID);
+        }
     }
 }
 

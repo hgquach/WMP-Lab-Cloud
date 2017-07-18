@@ -10,58 +10,53 @@ public class PreferanceMenu : MonoBehaviour {
 	private Toggle TimedField ;
     private InputField LimitField;
     private Toggle SurveyField;
-    private Button ApplyButton;
-    private Button ExitButton;
+    private Button ApplyButton,ExitButton;
 
-	private string ParticipantId ;
-	private bool RoundToggle;
-	private bool TimedToggle;
-    private int roundLimit;
-    private bool SurveyToggle;
-    private string theme;
-    private int sessionNumber;
-    private int level;
+	private string ParticipantId,theme ;
+    private bool RoundToggle, TimedToggle, SurveyToggle;
+    private int roundLimit,level,sessionNumber;
 
     private Canvas MainMenuCanvas;
     void Awake()
     {
-        this.Assignment();
     }
 
     void Start()
     {
+        this.Assignment();
         this.addListeners();
     }
 	
 	private void onUpdateID(string arg0)
 	{
 		this.ParticipantId = arg0;
-        string sessionFilePath = Path.Combine(Application.persistentDataPath, Path.Combine(@"Preferences",this.ParticipantId+".csv"));
-        if(File.Exists(sessionFilePath))
-        {
-            PreferanceStruct savedPref = FileIO.readPrefFile(sessionFilePath);
-            if(savedPref.IsTimed)
-            {
-                TimedField.isOn = true;
-                this.TimedToggle = true;
-            }
-            else
-            {
-                RoundField.isOn = true;
-                this.RoundToggle = true;
-            }
 
-            if(savedPref.SurveyQuestion)
-            {
-                SurveyField.isOn = true;
-                this.SurveyToggle = true;
-            }
-            this.level = savedPref.Level; 
-            this.theme = savedPref.Theme;
-            this.sessionNumber = savedPref.SessionNumber;
-            LimitField.text = savedPref.RoundLimit.ToString();
-            this.roundLimit = savedPref.RoundLimit;
-        }
+        //string sessionFilePath = Path.Combine(Application.persistentDataPath, Path.Combine(@"Preferences",this.ParticipantId+".csv"));
+        //if(File.Exists(sessionFilePath))
+        //{
+        //    PreferanceStruct savedPref = FileIO.readPrefFile(sessionFilePath);
+        //    if(savedPref.IsTimed)
+        //    {
+        //        TimedField.isOn = true;
+        //        this.TimedToggle = true;
+        //    }
+        //    else
+        //    {
+        //        RoundField.isOn = true;
+        //        this.RoundToggle = true;
+        //    }
+
+        //    if(savedPref.SurveyQuestion)
+        //    {
+        //        SurveyField.isOn = true;
+        //        this.SurveyToggle = true;
+        //    }
+        //    this.level = savedPref.Level; 
+        //    this.theme = savedPref.Theme;
+        //    this.sessionNumber = savedPref.SessionNumber;
+        //    LimitField.text = savedPref.RoundLimit.ToString();
+        //    this.roundLimit = savedPref.RoundLimit;
+        //}
 		//Debug.Log(arg0);
 	}
 
@@ -95,7 +90,14 @@ public class PreferanceMenu : MonoBehaviour {
     {
 
         string sessionFilePath = Path.Combine(Application.persistentDataPath, Path.Combine("Preferences",this.ParticipantId+".csv"));
+        string currentPrefFilePath =Path.Combine(Application.persistentDataPath, Path.Combine("Preferences", "CurrentPref.txt"));
+        string currentPrefID = FileIO.readCurrentPref(currentPrefFilePath);
         PreferanceStruct newPref = new PreferanceStruct();
+
+        if(currentPrefFilePath != this.ParticipantId)
+        {
+            FileIO.writeCurrentPref(this.ParticipantId);
+        }
         if (File.Exists(sessionFilePath))
         {
             newPref.SessionNumber = this.sessionNumber += 1;
@@ -117,13 +119,8 @@ public class PreferanceMenu : MonoBehaviour {
         {
             newPref.SurveyQuestion = true;
         }
-        GameData.gamedata.trialData.PartcipantId=this.ParticipantId;
-        GameData.gamedata.trialData.Session=newPref.SessionNumber;
-        GameData.gamedata.trialData.Level=newPref.Level;
-        GameData.gamedata.trialData.Theme=newPref.Theme;
-        GameData.gamedata.trialData.isRoundTimed=newPref.IsTimed;
-        GameData.gamedata.trialData.RoundLimit = newPref.RoundLimit;
-        GameData.gamedata.surveyToggled=newPref.SurveyQuestion;
+        this.updateGameDataPref(newPref, this.ParticipantId);
+
         FileIO.createPrefFile(newPref, int.Parse(this.ParticipantId));
         gameObject.GetComponent<Canvas>().enabled = false;
         MainMenuCanvas.enabled = true;
@@ -137,16 +134,53 @@ public class PreferanceMenu : MonoBehaviour {
 
     private void Assignment()
     {
+
         MainMenuCanvas = GameObject.FindGameObjectWithTag("MainMenu").GetComponent<Canvas>();
         Participant = gameObject.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.GetComponent<InputField>();
-        gameObject.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.GetComponent<InputField>().text = "100";
 		RoundField = gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(1).gameObject.GetComponent<Toggle>();
 		TimedField = gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(0).gameObject.GetComponent<Toggle>();
 		LimitField = gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(2).gameObject.GetComponent<InputField>();
-		gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(2).gameObject.GetComponent<InputField>().text = "100";
         SurveyField = gameObject.transform.GetChild(0).GetChild(0).GetChild(2).GetChild(0).gameObject.GetComponent<Toggle>();
         ApplyButton = gameObject.transform.GetChild(0).GetChild(0).GetChild(3).GetChild(0).gameObject.GetComponent<Button>();
         ExitButton = gameObject.transform.GetChild(0).GetChild(0).GetChild(4).GetChild(0).gameObject.GetComponent<Button>();
+
+        if(!GameData.gamedata.haveCurrentPref)
+        {
+            gameObject.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1).gameObject.GetComponent<InputField>().text = "999";
+            gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetChild(2).gameObject.GetComponent<InputField>().text = "999";
+
+        }
+        else
+        {
+            PreferanceStruct savedPref = GameData.gamedata.playerPref;
+            Debug.Log("current pref: " + savedPref.ToString());
+            this.Participant.text = GameData.gamedata.trialData.PartcipantId;
+            if (savedPref.IsTimed)
+            {
+                TimedField.isOn = true;
+                this.TimedToggle = true;
+            }
+            else
+            {
+                RoundField.isOn = true;
+                this.RoundToggle = true;
+            }
+
+            if (savedPref.SurveyQuestion)
+            {
+                SurveyField.isOn = true;
+                this.SurveyToggle = true;
+            }
+
+            this.ParticipantId = GameData.gamedata.trialData.PartcipantId;
+            this.LimitField.text = savedPref.RoundLimit.ToString();
+            this.level = savedPref.Level;
+            this.theme = savedPref.Theme;
+            this.sessionNumber = savedPref.SessionNumber;
+            LimitField.text = savedPref.RoundLimit.ToString();
+            this.roundLimit = savedPref.RoundLimit;
+
+        }
     }
     
     private void addListeners()
@@ -161,5 +195,16 @@ public class PreferanceMenu : MonoBehaviour {
         ExitButton.onClick.AddListener(onExit);
     }
 
+    private void updateGameDataPref(PreferanceStruct newPref , string prefID)
+    {
+        GameData.gamedata.trialData.PartcipantId= prefID;
+        GameData.gamedata.trialData.Session=newPref.SessionNumber;
+        GameData.gamedata.trialData.Level=newPref.Level;
+        GameData.gamedata.trialData.Theme=newPref.Theme;
+        GameData.gamedata.trialData.isRoundTimed=newPref.IsTimed;
+        GameData.gamedata.trialData.RoundLimit = newPref.RoundLimit;
+        GameData.gamedata.surveyToggled=newPref.SurveyQuestion;
+        GameData.gamedata.playerPref = newPref;
+    }
 }
 

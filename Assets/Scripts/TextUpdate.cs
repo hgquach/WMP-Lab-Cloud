@@ -13,16 +13,16 @@ public class TextUpdate : MonoBehaviour {
         this.GetComponent<MeshRenderer>().enabled = false;
 	}
 	// Use this for initialization
-    public void updateRoundTitle(int level , string themeName)
+    public void updateRoundTitle(int level)
     {
-		textMesh.text = baseLevel + level + "\n"+ themeName ;
+		textMesh.text = baseLevel + level;
 
     }
 
     public void updateFeedBack(float accuracy , float avgReactionTime)
     {
-        textMesh.text = "Accuracy So Far: " + accuracy.ToString("F2") + "\n" +
-            "Average Reaction Time: " + avgReactionTime.ToString("F2");
+        textMesh.text = "Accuracy So Far: " + ((accuracy *100).ToString("F2"))+"%" + "\n" +
+            "Average Reaction Time: " + avgReactionTime.ToString("F2") + "secs";
     }
 
     public void displayText()

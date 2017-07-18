@@ -12,17 +12,18 @@ public class GameData : MonoBehaviour {
     public PreferanceStruct playerPref;
     public bool surveyToggled;
     public bool isDemo;
+    public bool haveCurrentPref;
 	// Use this for initialization
     void Awake()
     {
-
+        haveCurrentPref = false;
         if(gamedata == null)
         {
             DontDestroyOnLoad(gameObject);
             gamedata = this;
-            // create a function that would check if a preferences folder exist on the device in the persistance data path
-            // if the file doesnt exist create one
-            // do the same for output files.
+            /*check if current pref file exist and if it doenst create one in the pref folders
+             * if it does exist then read the pref id and then update the game data
+             * */
             this.checkAndCreateFolders();
             this.sessionLevels = FileIO.readLevelFile("TestLevel1");
             this.sessionTheme = FileIO.readThemeFile("TestTheme");
@@ -40,6 +41,7 @@ public class GameData : MonoBehaviour {
     {
         FileIO.checkAndCreateTrialFolder();
         FileIO.checkAndCreatePrefFolder();
+        FileIO.checkandCreateCurrentPrefFile();
     }
 
 

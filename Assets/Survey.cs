@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 public class Survey : MonoBehaviour {
 
     private ArrayList questionList;
@@ -10,14 +11,172 @@ public class Survey : MonoBehaviour {
     // ui buttons and usch
     public GameObject LikertScale;
     public GameObject EffortScale;
-    public GameObject DifficultyScale; 
 
-    private ToggleGroup
+    private GameObject likertscale;
+    private GameObject effortscale;
+
+    private Button doneButton;
+    
+    private string LikertResponse, EffortResponse;
+    private bool questionAppear;
+
     void Awake()
     {
-        questionList.Add("How Much Did You Enjoy This Game");
-        questionList.Add("How Easy Was The Task");
-        questionList.Add("How Hard Did You Try To Do Your Best");
+        doneButton = this.gameObject.GetComponentInChildren<Button>();
+        this.questionList = new ArrayList();
+        questionList.Add("How Much Did You Like The Game Today ?");
+        questionList.Add("How Hard Did You Try Today?");
+        this.questionAppear = false;
+    }
+
+    void Update()
+    {
+        Debug.Log("the current question is:  " + this.currentQuestion);
+        Debug.Log("did a question appear:  " + this.questionAppear);
+        switch(currentQuestion)
+        {
+            case 0:
+                if (!this.questionAppear)
+                {
+                    this.updateQuestionString(currentQuestion);
+                    CreateLikertScale();
+                    this.questionAppear = true;
+                }
+                break;
+            case 1:
+                if (!this.questionAppear)
+                {
+                    this.updateQuestionString(currentQuestion);
+                    CreateEffortScale();
+                    this.questionAppear = true;
+                }
+                break;
+            case 2:
+                Debug.Log(" Likert Reponse "+this.LikertResponse +" Effort Reponse "+ this.EffortResponse);
+                FileIO.writeSurveyResponse(this.LikertResponse +","+ this.EffortResponse+ ","+ System.DateTime.UtcNow.ToString("HH:mm dd MMMM, yyyy"));
+                SceneManager.LoadScene(0);
+                break;
+        }
+
+    }
+    private void CreateLikertScale()
+    {
+        this.likertscale = Instantiate(LikertScale) as GameObject;
+        likertscale.transform.SetParent(this.gameObject.transform,false);
+        likertscale.name = "likertscale";
+        doneButton.onClick.RemoveAllListeners();
+        doneButton.onClick.AddListener(returnLikertScaleChoice);
+        
+    }
+
+    private void removeLikertScale()
+    {
+        this.likertscale.transform.SetParent(null);
+        Destroy(this.likertscale);
+    }
+
+    private void removeEffortScale()
+    {
+        this.effortscale.transform.SetParent(null);
+        Destroy(this.effortscale);
+    }
+
+    private void returnLikertScaleChoice()
+    {
+        int toggleNumber = 0;
+        if(this.likertscale.GetComponent<ToggleGroup>().ActiveToggles() != null && this.currentQuestion ==0)
+        {
+            for(int i = 0; i < this.likertscale.transform.childCount; i++)
+            {
+                if(this.likertscale.transform.GetChild(i).GetComponent<Toggle>().isOn)
+                {
+                    toggleNumber = (i+1);
+                    this.currentQuestion += 1;
+                }
+            }
+        }
+  
+        this.LikertResponse = this.toggleToResponse(toggleNumber, this.likertscale);
+
+    }
+
+    private string toggleToResponse(int toggleNum , GameObject scale)
+    {
+
+        switch(toggleNum)
+        {
+            case 0:
+                return null;
+            case 1:
+                if(scale.name == "likertscale")
+                {
+                    this.removeLikertScale();
+                }
+                else if (scale.name == "effortscale")
+                {
+                    this.removeEffortScale();
+                }
+                this.questionAppear = false;
+                return "Strongly Agree";
+            case 2:
+                if(scale.name == "likertscale")
+                {
+                    this.removeLikertScale();
+                }
+                else if (scale.name == "effortscale")
+                {
+                    this.removeEffortScale();
+                }
+                this.questionAppear = false;
+                return "Neutral";
+            case 3:
+                if(scale.name == "likertscale")
+                {
+                    this.removeLikertScale();
+                }
+                else if (scale.name == "effortscale")
+                {
+                    this.removeEffortScale();
+                }
+                this.questionAppear = false;
+                return "Strongly Disagree";
+            default:
+                return "no option";
+        }
+    }
+
+    private void returnEffortScaleChoice()
+    {
+        int toggleNumber = 0;
+        if(this.effortscale.GetComponent<ToggleGroup>().ActiveToggles() != null && this.currentQuestion == 1)
+        {
+            for(int i = 0; i < this.effortscale.transform.childCount; i++)
+            {
+                if(this.effortscale.transform.GetChild(i).GetComponent<Toggle>().isOn)
+                {
+                    toggleNumber = (i+1);
+                    this.currentQuestion += 1;
+                }
+            }
+        }
+  
+        this.EffortResponse = this.toggleToResponse(toggleNumber,this.effortscale);
+
+
+
+    }
+    private void CreateEffortScale()
+    {
+        this.effortscale = Instantiate(EffortScale) as GameObject;
+        effortscale.transform.SetParent(this.gameObject.transform, false);
+        effortscale.name = "effortscale";
+        doneButton.onClick.RemoveAllListeners();
+        this.doneButton.onClick.AddListener(this.returnEffortScaleChoice);
+    }
+    
+    private void updateQuestionString(int questionNumber)
+    {
+        this.gameObject.GetComponentInChildren<Text>().text = (string)this.questionList[questionNumber];
     }
     /*
      * This script will handle all event regarding the survey menu including recording user answer

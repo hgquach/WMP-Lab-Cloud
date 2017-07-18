@@ -5,14 +5,14 @@ using UnityEngine;
 public class RecordingManager : MonoBehaviour
 {
     private SessionManager sessionmanager;
-    private RoundManagerTest roundmanager;
+    private RoundManager roundmanager;
     private float trialStartTime;
     private float trialEndTime; 
 
     void Awake()
     {
         sessionmanager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
-        roundmanager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
+        roundmanager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
     }
     public void StartRecording()
     {
@@ -37,8 +37,8 @@ public class RecordingManager : MonoBehaviour
         this.trialEndTime = Time.time;
         GameData.gamedata.trialData.accuracy = roundmanager.checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice).ToString();
         GameData.gamedata.trialData.ReactionTime = this.trialEndTime - this.trialStartTime;
-        roundmanager.totalReactionTime += this.trialEndTime = this.trialStartTime;
-        GameData.gamedata.trialData.TimeElasped = Time.time - sessionmanager.timeRoundstart;
+        roundmanager.totalReactionTime += this.trialEndTime - this.trialStartTime;
+        GameData.gamedata.trialData.TimeElasped = this.trialEndTime - sessionmanager.timeRoundstart;
         FileIO.writeTrialData(GameData.gamedata.trialData);
     }
 

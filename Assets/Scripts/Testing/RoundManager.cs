@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Random = UnityEngine.Random;
-public class RoundManagerTest : MonoBehaviour {
+public class RoundManager : MonoBehaviour {
 
     // holding left and right side information
     // hold the line renderer that draws the line down the middle of the screen
@@ -55,6 +55,7 @@ public class RoundManagerTest : MonoBehaviour {
     // bool to check if the round is currently underway 
     private int trialSoFar, correctSoFar;
     public float accuracySoFar = .6f;
+    private float startTime;
     private bool isTrialRunning;
     public GameObject RecordingManager;
     public float totalReactionTime; 
@@ -62,7 +63,15 @@ public class RoundManagerTest : MonoBehaviour {
 
 
 
+    void Update()
+    {
+        Debug.Log(Time.unscaledTime - this.startTime);
+        if( (Time.time - this.startTime) >5f)
+        {
+            this.timeExpired();
+        }
 
+    }
 	void Awake()
 	{
         this.Assignment();
@@ -336,7 +345,8 @@ public class RoundManagerTest : MonoBehaviour {
 	{
 		this.readyForUser = false;
         this.recordingmanager.StopRecording();
-		_clearDot (this.leftContainer, this.rightContainer);	
+		_clearDot (this.leftContainer, this.rightContainer);
+       // Debug.Log("correct answer = " + this.CorrectAnswer.ToString() + "user choice= " + this.userChoice.ToString());
 		if (checkAnswer (this.CorrectAnswer, this.userChoice)) {
             this.incCorrectSoFar();
 			GameObject result = Resources.Load ("correct1") as GameObject;
@@ -352,12 +362,24 @@ public class RoundManagerTest : MonoBehaviour {
 
 	}
 
+    public void timeExpired()
+    {
+        this.readyForUser = false;
+        this.recordingmanager.StopRecording();
+        _clearDot(this.leftContainer, this.rightContainer);
+        GameObject result = Resources.Load("incorrect1") as GameObject;
+        GameObject spawnedResult = Instantiate(result, new Vector2(0, 0), Quaternion.identity);
+        StartCoroutine(waitAndDelete(spawnedResult));
+        this.waitAndStartTrial();
+
+    }
 	private IEnumerator waitAndDelete(GameObject resultSprite)
 	{
-        this.accuracySoFar= this.getCorrectSoFar() == 0 ? .6f : (float)this.getCorrectSoFar() / (float)this.getTrialSoFar();
         this.trialSoFar++;
+        //Debug.Log("correct so far over trial so far: " + this.getCorrectSoFar() + "/" + this.trialSoFar);
+        this.accuracySoFar= this.getCorrectSoFar() == 0 ? .6f : (float)this.getCorrectSoFar() / (float)this.getTrialSoFar();
         this.removeDivider();
-		yield return new WaitForSecondsRealtime(1f);
+		yield return new WaitForSecondsRealtime(.5f);
 		Destroy (resultSprite);
 
 
@@ -367,6 +389,7 @@ public class RoundManagerTest : MonoBehaviour {
 	{
         _clearGameObjectList(this.dotList);
 		this.dotPerSide = _dotPerSide (this.dotRatio,this.dotMax);
+        this.CorrectAnswer = this._correctAnswer(this.dotPerSide.cloud1, this.dotPerSide.cloud2);
         yield return new WaitForSecondsRealtime(1.5f);
         this._addDivider();
         yield return new WaitForSecondsRealtime(.5f);
@@ -374,6 +397,7 @@ public class RoundManagerTest : MonoBehaviour {
 		_spawnLocation ( this.leftContainer,this.rightContainer,this.dotSprite, this.dotSeparation, dotPerSide.cloud2, this.dotColor, Sides.Right);
         this.readyForUser = true;
         this.recordingmanager.StartRecording();
+        this.startTime = Time.time;
 	}
 
     public IEnumerator displayFeedBack()
@@ -382,7 +406,7 @@ public class RoundManagerTest : MonoBehaviour {
         yield return new WaitForSecondsRealtime(1.5f);
         this.isTrialRunning = false;
         this.isDisplayFeedback = true;
-        this.feedbackText.updateFeedBack(this.accuracySoFar, totalReactionTime / this.trialSoFar);
+        this.feedbackText.updateFeedBack(this.accuracySoFar, (this.totalReactionTime / this.trialSoFar));
         this.feedbackText.displayText();
         this.readyForUser = true;
 
@@ -409,6 +433,8 @@ public class RoundManagerTest : MonoBehaviour {
             this.removeDivider();
             this.isRoundStart = false;
             this.totalReactionTime = 0f;
+            this.correctSoFar = 0;
+            this.trialSoFar = 0;
             sessionManager.incRound();
 		}
 	}
@@ -467,8 +493,7 @@ public class RoundManagerTest : MonoBehaviour {
             }
         }
     }
-// there is a problem with this function because the dots positions are determined using the random.insideunitcirlce then multiplied by a multiplier 
-// depending on the multiplier the distance of seperation required make the function's evaluation faulty. 
+
     public void removeDivider()
     {
         sideDivider.GetComponent<LineRenderer>().enabled = false;

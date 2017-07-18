@@ -8,7 +8,7 @@ public class SessionManager : MonoBehaviour {
 
 
     TextUpdate textupdate;
-    RoundManagerTest roundManager;
+    RoundManager roundManager;
     SpriteRenderer background;
     Timer timer;
     [SerializeField]
@@ -34,7 +34,7 @@ public class SessionManager : MonoBehaviour {
             this.isTimedSession = false;
         }
         this.Assignment();
-        background.sprite = Resources.Load<Sprite>("Background/"+this.roundTheme.backgroundImage);
+        background.sprite = Resources.Load<Sprite>("Background/" + this.roundTheme.backgroundImage);
 
         if (!this.isTimedSession)
         {
@@ -122,10 +122,10 @@ public class SessionManager : MonoBehaviour {
 
     private IEnumerator waitDisplay(int level ,string themeName)
     {
-        yield return new WaitForSeconds(.5f);
-        textupdate.updateRoundTitle(level, themeName);
+        yield return new WaitForSecondsRealtime(.5f);
+        textupdate.updateRoundTitle(level);
         textupdate.displayText();
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSecondsRealtime(1.5f);
         textupdate.hideText();
     }
 
@@ -156,12 +156,11 @@ public class SessionManager : MonoBehaviour {
         }
         else if ( accuracy <= .5f)
         {
-            if((currentLevel- 1) >= 0)
+            if((currentLevel- 1) > 0)
             {
                 currentLevel--;
             }
         }
-        Debug.Log("this is the current level: " + currentLevel);
         return currentLevel;
 
 
@@ -187,19 +186,28 @@ public class SessionManager : MonoBehaviour {
         {
             FileIO.createPrefFile(GameData.gamedata.playerPref, int.Parse(GameData.gamedata.trialData.PartcipantId));
         }
-        SceneManager.LoadScene(0);
+
+        if(GameData.gamedata.surveyToggled)
+        {
+            SceneManager.LoadScene(2);
+        }
+        else
+        {
+
+            SceneManager.LoadScene(0);
+        }
     }
     
     private void Assignment()
     {
 
         this.isTimedSession = GameData.gamedata.trialData.isRoundTimed;
-        this.roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
+        this.roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
         this.textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
         this.background = GameObject.FindGameObjectWithTag("BackgroundCamera").GetComponentInChildren<SpriteRenderer>();
         this.currentRound = 1;
         this.currentLevel = (GameData.gamedata.trialData.Level == 0) ? 1 : GameData.gamedata.trialData.Level;
-        this.roundTheme = GameData.gamedata.sessionTheme["Moon"];
+        this.roundTheme = GameData.gamedata.sessionTheme["p7"];
 
     }
 }

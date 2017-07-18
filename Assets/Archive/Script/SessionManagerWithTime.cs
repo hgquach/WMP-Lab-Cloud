@@ -11,7 +11,7 @@ public class SceneManagerWithTimes : MonoBehaviour {
     //this.dotMax = 50;
     //      this.dotSeparation = 1;
     TextUpdate textupdate;
-    RoundManagerTest roundManager;
+    RoundManager roundManager;
     Timer timer;
     [SerializeField]
     private bool isTimedSession;
@@ -29,7 +29,7 @@ public class SceneManagerWithTimes : MonoBehaviour {
 
     void Awake()
     {
-        roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManagerTest>();
+        roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
         textupdate = GameObject.FindGameObjectWithTag("LevelText").GetComponent<TextUpdate>();
 
         levelArray[0] = new LevelStruct(1,10,1,new RatioStruct(1,3));
@@ -91,7 +91,7 @@ public class SceneManagerWithTimes : MonoBehaviour {
     private IEnumerator waitDisplay(int level ,string themeName)
     {
         yield return new WaitForSeconds(.5f);
-        textupdate.updateRoundTitle(level, themeName);
+        textupdate.updateRoundTitle(level);
         textupdate.displayText();
         yield return new WaitForSeconds(.5f);
         textupdate.hideText();
