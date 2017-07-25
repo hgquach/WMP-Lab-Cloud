@@ -11,14 +11,16 @@ public struct ThemeStruct
     public string levelName,dotShape;
     public string backgroundImage;
     public List<Color> dotColorRange;
+    public Color UIColor;
     // distractor opition 
 
-    public ThemeStruct(string name , string shape , List<Color> colorRange, string bgImg = "none")
+    public ThemeStruct(string name , string shape , List<Color> colorRange, Color color, string bgImg = "none")
     {
         this.backgroundImage = bgImg;
         this.levelName = name;
         this.dotShape = shape;
         this.dotColorRange = colorRange;
+        this.UIColor = color;
     }
 
     public Color returnRandomColor()

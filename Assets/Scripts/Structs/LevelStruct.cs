@@ -9,17 +9,15 @@ public struct LevelStruct
      * via reading a text file that contains all the levels
      */
 
-    public int levelNum, dotMax, spread,trialMax;
+    public int levelNum, dotMax, spread;
     public RatioStruct ratio;
 
-    public LevelStruct(int level , int max , int spread , RatioStruct Ratio, int maxTrial =5)
+    public LevelStruct(int level , int max , int spread , RatioStruct Ratio)
     {
         this.levelNum = level;
         this.dotMax = max;
         this.spread = spread;
         this.ratio = Ratio;
-        this.trialMax = maxTrial;
-
     }
     
 

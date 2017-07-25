@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 public struct TrialStruct
 {
-    public string TaskName, PartcipantId, Theme,Response,GameVersion,AndroidOSVersion,accuracy
-        ,ScreenReso,Date,Dot;
-    public int RoundNumber, Level , sizeLeftCloud , sizeRightCloud,RoundLimit,Session;
+    public string TaskName, PartcipantId, Theme,Response,GameVersion,OSSystem,accuracy
+        ,ScreenReso,Date,Time,Dot,Background;
+    public int RoundNumber, Level,Point, sizeLeftCloud , sizeRightCloud,RoundLimit,TimeLimit,Session,EffortReponse,DifficultyReponse,TrialNumber;
     public float ReactionTime,TimeElasped;
     public Color color;
-    public bool isRoundTimed;
 
-    public TrialStruct( string TaskName, string PartcipantId, int Session, string Theme,string Response,string GameVersion,
-        string AndroidOSVersion,string Screen , string date,string dot,
-     int RoundNumber, int Level , int sizeLeftCloud , int sizeRightCloud,
+    public TrialStruct( string TaskName, string PartcipantId, int Session, string Theme,string Response,
+        string GameVersion,string ossytem,string background,string Screen , string date,string time, string dot,
+     int RoundNumber, int Level , int sizeLeftCloud , int sizeRightCloud,int eReponse,
+     int dReponse, int trial,int point, int timelimit,
      float ReactionTime,float TimeElasped, string accuracy,
      Color color , bool roundTimed = false, int limit = 5)
     {
@@ -25,7 +25,7 @@ public struct TrialStruct
         this.ScreenReso = Screen;
         this.Date = date;
         this.Dot = dot;
-        this.AndroidOSVersion = AndroidOSVersion;
+        this.OSSystem = ossytem;
         this.RoundNumber = RoundNumber;
         this.Level = Level;
         this.sizeLeftCloud = sizeLeftCloud;
@@ -34,18 +34,27 @@ public struct TrialStruct
         this.TimeElasped = TimeElasped;
         this.accuracy = accuracy;
         this.color = color;
-        this.isRoundTimed = roundTimed;
         this.RoundLimit = limit;
+        this.Time = time;
+        this.DifficultyReponse = dReponse;
+        this.EffortReponse = eReponse;
+        this.TrialNumber = trial;
+        this.Point = point;
+        this.TimeLimit = timelimit;
+        this.Background = background;
     }
 
     public override string ToString()
     {
         string colorStringAdjusted = this.color.ToString();
         colorStringAdjusted = colorStringAdjusted.Replace(",","-");
-        Debug.Log(colorStringAdjusted);
-        return TaskName +","+ PartcipantId +","+ Session.ToString()+","+ScreenReso+","+isRoundTimed+","+RoundLimit+","+Date+","+Dot+"," + RoundNumber.ToString()+"," + Level.ToString()+"," +
-        accuracy +","+ ReactionTime.ToString()+"," + Response+"," + sizeLeftCloud.ToString()+"," + sizeRightCloud.ToString()+"," +
-        colorStringAdjusted+"," + AndroidOSVersion+"," + GameVersion+"," + TimeElasped.ToString()+"\r\n";
+        string[] TrialStringArray = { this.TaskName,GameVersion,OSSystem,this.ScreenReso,this.PartcipantId
+        ,this.Date,this.Time,this.Session.ToString(),this.Level.ToString(),this.RoundNumber.ToString(),this.TrialNumber.ToString()
+        , this.accuracy.ToString() , this.ReactionTime.ToString(),this.Point.ToString(),this.Response,this.sizeLeftCloud.ToString()
+        ,this.sizeRightCloud.ToString(),this.Dot,this.Background,this.RoundLimit.ToString(),this.TimeLimit.ToString()
+        ,this.TimeElasped.ToString("F2"),this.DifficultyReponse.ToString(),this.EffortReponse.ToString()};
+
+        return string.Join(",", TrialStringArray);
     }
 
 
