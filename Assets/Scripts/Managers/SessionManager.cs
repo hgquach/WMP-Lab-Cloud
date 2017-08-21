@@ -114,7 +114,7 @@ public class SessionManager : MonoBehaviour {
         return this.currentLevel;
     }
 
-    private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , int dotSepartaion = 2)
+    private void UpdateRound(RatioStruct ratio,Color color , int trialMax , string dotSprite , int dotMax , float dotSepartaion)
     {
         this.roundManager.resetRoundValue();
         this.roundManager.setColor(color);

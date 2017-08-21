@@ -48,7 +48,7 @@ public class RoundManager : MonoBehaviour {
     private List<List<GameObject>> dotLists = new List<List<GameObject>>();
     private List<List<Vector2>> allDotLocation = new List<List<Vector2>>();
     //int for configuring dot separation
-    public int dotSeparation;
+    public float dotSeparation;
     // private bools to symbolize when the round should start or not
     // bool to determien if the feedback is being displayed
     private bool isRoundStart, isDisplayFeedback,isTrialRunning;
@@ -118,7 +118,7 @@ public class RoundManager : MonoBehaviour {
 		this.dotSprite = sprite;
 	}
 
-    public void setDotSeperation(int distance)
+    public void setDotSeperation(float distance)
     {
         this.dotSeparation = distance;
     }
@@ -222,7 +222,7 @@ public class RoundManager : MonoBehaviour {
         this.correctSoFar++;
     }
 
-    private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, int separation ,int amount,Sides side)
+    private void _spawnLocation(Transform lContainer, Transform rContainer,string obj, float separation ,int amount,Sides side)
 	{
 
 		switch(side)
@@ -241,7 +241,7 @@ public class RoundManager : MonoBehaviour {
 		
 	}
 
-	private void _spawnDot(Transform container,string obj, int separation ,int amount, Vector2 sideScale,GameObject dotTemplate,Sides side)	
+	private void _spawnDot(Transform container,string obj, float separation ,int amount, Vector2 sideScale,GameObject dotTemplate,Sides side)	
 	{
 
 		for(int i = 0 ; i < amount ; i++)
@@ -249,21 +249,33 @@ public class RoundManager : MonoBehaviour {
             bool restrictNotPass = true;
             do {
                 // see if we can do this with float values
-                Vector2 circlePos = Random.insideUnitCircle * (separation + 1); 
+                Vector2 circlePos = Random.insideUnitCircle * (separation + 1f); 
                 Vector2 dotPos = new Vector2(circlePos.x + sideScale.x, circlePos.y + sideScale.y);
-                GameObject spawnDot = Instantiate(dotTemplate, dotPos, transform.rotation) as GameObject;
-                spawnDot.SetActive(true);
-               
-                if(!_checkOverlap(spawnDot,this.dotLists ,side)  && ! _checkSeparation(separation,spawnDot,this.dotLists,side))
+
+                /**
+                 * if(!_checkSeparation(vector2 dot pos, list of list of vector 2,side))
+                 *{
+                 *  instantiate dot then check overlap
+                 * }
+                 * */
+
+                if(!_checkSeparation(separation,dotPos,this.allDotLocation,side))
                 {
-                    restrictNotPass = false;
-                    int sideIndex = (side == Sides.Left && side != Sides.Null ? 0 : 1);
-                    this.dotLists[sideIndex].Add(spawnDot);
-                    spawnDot.transform.SetParent(container);
-                }
-                else
-                {
-                    Destroy(spawnDot);
+                    GameObject spawnDot = Instantiate(dotTemplate, dotPos, transform.rotation) as GameObject;
+                    spawnDot.SetActive(true);
+                    if(!_checkOverlap(spawnDot,this.dotLists ,side))
+                    {
+                        restrictNotPass = false;
+                        int sideIndex = (side == Sides.Left && side != Sides.Null ? 0 : 1);
+                        this.dotLists[sideIndex].Add(spawnDot);
+                        this.allDotLocation[sideIndex].Add(dotPos);
+                        spawnDot.transform.SetParent(container);
+                    }
+                    else
+                    {
+                        Destroy(spawnDot);
+                    
+                    }
                 }
             }while ( restrictNotPass);
 
@@ -499,31 +511,29 @@ public class RoundManager : MonoBehaviour {
 
     }
 
-    private bool _checkSeparation(int distance,GameObject dotPos, List<List<GameObject>> dotList , Sides side)
+    private bool _checkSeparation(float distance,Vector2 dotPos, List<List<Vector2>> dotPosList , Sides side)
     {
         int sideIndex = (side == Sides.Left && side != Sides.Null) ? 0 : 1;
-        if(dotList[sideIndex].Count > 0)
+        if(dotPosList[sideIndex].Count > 0)
         {
-            foreach(GameObject checkDot in dotList[sideIndex])
+            foreach(Vector2 checkDotPos in dotPosList[sideIndex])
             {
-                if (dotPos != null && checkDot != null)
+        
+                float printDist = Vector2.Distance(dotPos,checkDotPos);
+                Debug.Log("this is the desired seperation: " + distance + " this is the distance a dot: " + printDist);
+                if (distance > Vector2.Distance(dotPos, checkDotPos))
                 {
-                    //TODO: make distance an even smaller value use float values
-                    int printDist = Mathf.FloorToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position,checkDot.GetComponent<Transform>().position));
-                    Debug.Log("this is the desired seperation: " + distance + " this is the distance a dot: " + printDist);
-                    if (distance > (Mathf.CeilToInt(Vector2.Distance(dotPos.GetComponent<Transform>().position, checkDot.GetComponent<Transform>().position))))
-                    {
-                       print("not far enough");
-                       return true;
-                    }
+                   print("not far enough");
+                   return true;
                 }
+                
             }
         }
 
         return false;   
     }
 
-    private void _clearGameObjectList(List<List<GameObject>> dotContainer)
+    private void _clearGameObjectList(List<List<GameObject>> dotContainer , List<List<Vector2>> allDotPos)
     {
         foreach(List<GameObject> dotList in dotContainer)
         {
@@ -534,6 +544,11 @@ public class RoundManager : MonoBehaviour {
                     Destroy(dot);
                 }
             }
+        }
+
+        foreach(List<Vector2> posLists in allDotPos)
+        {
+            posLists.Clear();
         }
     }
 
@@ -575,12 +590,14 @@ public class RoundManager : MonoBehaviour {
         this.bonusPoints = 0;
         this.dotLists.Add(new List<GameObject>());
         this.dotLists.Add(new List<GameObject>());
+        this.allDotLocation.Add(new List<Vector2>());
+        this.allDotLocation.Add(new List<Vector2>());
     }
 
     public void clearTrialScreen()
     {
         GameObject smileResult= GameObject.FindGameObjectWithTag("Smiley");
-        this._clearGameObjectList(this.dotLists);
+        this._clearGameObjectList(this.dotLists, this.allDotLocation);
         this.removeDivider();
         this.feedbackText.hideText();
         if(smileResult != null)

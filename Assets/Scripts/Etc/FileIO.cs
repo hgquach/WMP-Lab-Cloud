@@ -245,13 +245,13 @@ public static class FileIO
     {
 
         PreferanceStruct defaultPref = new PreferanceStruct();
-        defaultPref.RoundLimit = 10;
+        defaultPref.RoundLimit = 3;
         defaultPref.IsTimed = false;
         defaultPref.SurveyQuestion = false;
         defaultPref.ThemeChange = 2;
         defaultPref.MaxError = 85;
         defaultPref.MinError = 65;
-        defaultPref.trialsPerRd = 25;
+        defaultPref.trialsPerRd = 10;
         defaultPref.Language = "English";
         writePrefFile(defaultPref,true);
     }
@@ -491,8 +491,8 @@ public static class FileIO
 
     //        string pathwaySrc = Application.streamingAssetsPath + "/Background/" + pair.Key + "/" + pair.Value;
     //        Debug.Log(pathwaySrc);
-    //        string pathwayTrg = FileIO.FILE_PATH_TO_THEME_FOLDER + @"\" + pair.Key.ToString() + @"\" + pair.Value.ToString();
-    //        pathwayTrg= pathwayTrg.Replace("\n", "").Replace("\r", "");
+    //        string pathwayTrg = FileIO.FILE_PATH_TO_THEME_FOLDER + @"/" + pair.Key.ToString() + @"/" + pair.Value.ToString();
+    //        pathwayTrg = pathwayTrg.Replace("\n", "").Replace("\r", "");
     //        Debug.Log(pathwayTrg);
     //        WWW reader = new WWW(pathwaySrc);
     //        while (!reader.isDone) { }
@@ -500,15 +500,24 @@ public static class FileIO
     //        {
     //            if (pathwayTrg.Contains(".txt"))
     //            {
-    //                File.Create(pathwayTrg).Dispose();
+    //                File.Create(pathwayTrg);
+    //                File.WriteAllBytes(pathwayTrg, reader.bytes);
+
     //            }
 
-    //            if(pathwayTrg.Contains(".png"))
+    //            if (pathwayTrg.Contains(".png"))
     //            {
+    //                File.WriteAllBytes(pathwayTrg, reader.texture.EncodeToPNG());
+    //            }
 
+    //            if(pathwayTrg.Contains(".jpg"))
+    //            {
+    //                Texture2D texture = new Texture2D(2,2);
+    //                reader.LoadImageIntoTexture(texture);
+    //                texture.EncodeToJPG();
+    //                File.WriteAllBytes(pathwayTrg, texture.EncodeToPNG());
     //            }
     //        }
-    //        File.WriteAllBytes(pathwayTrg, reader.bytes);
     //        reader.Dispose();
     //    }
     //}
@@ -525,7 +534,7 @@ public static class FileIO
     //    foreach (string s in splitContent)
     //    {
     //        string[] tempSplit = s.Split(',');
-    //       // Debug.Log(tempSplit[0] + "," + tempSplit[1]);
+    //        // Debug.Log(tempSplit[0] + "," + tempSplit[1]);
     //        fileDirectory[tempSplit[0]] = tempSplit[1];
     //    }
     //    return fileDirectory;
@@ -665,7 +674,7 @@ public static class FileIO
                         string[] levelInfo = line.Split(new[] { ',' },System.StringSplitOptions.RemoveEmptyEntries);
                        // Debug.Log("this is the levels ratio" + levelInfo[3]);
                         RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
-                        level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), int.Parse(levelInfo[2]), levelRatio);
+                        level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), float.Parse(levelInfo[2]), levelRatio);
                         levelList.Add(level);
                     }
                 }
