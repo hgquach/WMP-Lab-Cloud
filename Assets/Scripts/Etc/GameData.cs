@@ -12,7 +12,7 @@ public class GameData : MonoBehaviour {
     public TrialStruct trialData;
     public PreferanceStruct SessionPreferance;
     public ParticipantStruct currentParticipant;
-    public bool surveyToggled,isDemo,haveCurrentParticipant;
+    public bool surveyToggled,isDemo,haveCurrentParticipant,haveLevels,haveThemes;
     public Dictionary<string, string> translatedDictionary;
     public string SessionTimeStartStamp;
 	// Use this for initialization
@@ -23,9 +23,15 @@ public class GameData : MonoBehaviour {
             DontDestroyOnLoad(gameObject);
             gamedata = this;
 
+            GameData.gamedata.haveLevels = false;
+            GameData.gamedata.haveThemes = false;
+            //Dictionary<string,string> tempDict = FileIO.readStreamingAssetDirectory();
+            //FileIO.moveStreamingAssets(tempDict);
             this.checkAndCreateFolders();
-            this.sessionLevels = FileIO.readLevelFile("TestLevel1");
-            this.sessionTheme = FileIO.readThemeFile("TestTheme");
+            ////  FileIO.populateThemeFolder();
+            ////FileIO.populateLevelFolder();
+            this.sessionLevels = FileIO.returnLevelInFolder();
+            this.sessionTheme = FileIO.searchandFilterForThemeFolder();
             trialData.TaskName = "Cloud";
         }
         else if(gamedata != this)
@@ -41,6 +47,8 @@ public class GameData : MonoBehaviour {
         FileIO.checkAndCreateParticipantFolder();
         FileIO.checkAndCreateCurrentParticipantFile();
         FileIO.checkAndCreateLanguageFolder();
+        FileIO.checkandCreateThemeFolder();
+        FileIO.checkedAndCreateLevelFolder();
     }
 
 

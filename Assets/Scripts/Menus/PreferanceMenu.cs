@@ -174,6 +174,15 @@ public class PreferanceMenu : MonoBehaviour {
         
     }
 
+    //private void onPopulate()
+    //{
+    //    //FileIO.populateThemeFolder();
+    //    //FileIO.populateLevelFolder();
+    //    //GameData.gamedata.sessionLevels = FileIO.returnLevelInFolder();
+    //    //GameData.gamedata.sessionTheme = FileIO.searchandFilterForThemeFolder();
+    //    //GameData.gamedata.translatedDictionary = FileIO.readLanguageFile("English");
+    //}
+
     private void Assignment()
     {
 
@@ -226,10 +235,10 @@ public class PreferanceMenu : MonoBehaviour {
         this.MinError.text = savedPref.MinError.ToString();
         this.TrialPerRd.text = savedPref.trialsPerRd.ToString();
         GameData.gamedata.translatedDictionary = FileIO.readLanguageFile(savedPref.Language);
-        foreach(KeyValuePair<string ,string> pair in GameData.gamedata.translatedDictionary)
-        {
-            Debug.Log(pair.ToString());
-        }
+        //foreach(KeyValuePair<string ,string> pair in GameData.gamedata.translatedDictionary)
+        //{
+        //    Debug.Log(pair.ToString());
+        //}
         GameObject.FindGameObjectWithTag("MainMenu").GetComponent<Menu>().assignNamesToButton();
 
         
@@ -249,6 +258,7 @@ public class PreferanceMenu : MonoBehaviour {
         TrialPerRd.onValueChanged.AddListener(onUpdatetrialPerRd);
         ApplyButton.onClick.AddListener(onSave);
         ExitButton.onClick.AddListener(onExit);
+        //Populate.onClick.AddListener(onPopulate);
         this.languageDropDown.onValueChanged.AddListener(onUpdateLanguage);
     }
 

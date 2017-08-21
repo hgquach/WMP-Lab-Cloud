@@ -8,154 +8,29 @@ using System.Text;
 public static class FileIO
 {
     static public string FILE_PATH_TO_MAIN_PREFERENCE = Path.Combine(Application.persistentDataPath , Path.Combine("Preferences" ,"Preference.csv"));
-    
     static public string FILE_PATH_TO_DEMO_PREFERENCE =  Path.Combine(Application.persistentDataPath, Path.Combine("Preferences", "DemoPreference.csv"));
-
     static public string FILE_PATH_TO_DEMO_PARTICIPANTS = Path.Combine(Application.persistentDataPath, Path.Combine("Participants", "DemoParticipant.txt"));
-
     static private string FILE_PATH_TO_LANGAUGE_FOLDER =  Path.Combine(Application.persistentDataPath, "Languages");
+    static private string FILE_PATH_TO_LEVEL_FOLDER = Path.Combine(Application.persistentDataPath, "Levels");
+    static private string FILE_PATH_TO_THEME_FOLDER = Path.Combine(Application.persistentDataPath, "Themes");
+    private const int CORRECT_LINE_NUM = 21;
 
-    private const int CORRECT_LINE_NUM = 20;
-
-    static public List<LevelStruct> readLevelFile(string filename)
+    static public void checkedAndCreateLevelFolder()
     {
-        List<LevelStruct> levelList = new List<LevelStruct>();
-        int lineNum = 0;
-        //string path = Application.dataPath+"Resources/" + filename;
-        //Debug.Log("Loading file");
-        TextAsset levelFile= Resources.Load(filename) as TextAsset;
-        string[] splitLevelFile = levelFile.text.Split("\n"[0]);
-        foreach(string levelInfo in splitLevelFile)
+        DirectoryInfo LevelFolder = new DirectoryInfo(FileIO.FILE_PATH_TO_LEVEL_FOLDER);
+        if(!LevelFolder.Exists)
         {
-            if(lineNum != 0)
-            {
-                LevelStruct level;
-                string[] individualLevelInfo = levelInfo.Split(","[0]);
-                RatioStruct levelRatio = new RatioStruct(int.Parse(individualLevelInfo[3].Split('/')[0]), int.Parse(individualLevelInfo[3].Split('/')[1]));
-                level = new LevelStruct(int.Parse(individualLevelInfo[0]), int.Parse(individualLevelInfo[1]), int.Parse(individualLevelInfo[2]), levelRatio);
-                levelList.Add(level);
-            }
-            lineNum++;
+            LevelFolder.Create();
         }
-        //try
-        //{
-        //    StreamReader reader = new StreamReader(path);
-        //    using (reader)
-        //    {
-        //        do
-        //        {
-        //            Debug.Log("reading files");
-        //            line = reader.ReadLine();
-        //            if (lineNum != 0 && line!= null)
-        //            {
-        //                LevelStruct level;
-        //                line = line.Replace("/r", "").Replace("/n", "");
-        //                Debug.Log("this is the level line: " + line);
-        //                string[] levelInfo = line.Split(',');
-        //                foreach (string s in levelInfo)
-        //                {
-        //                    Debug.Log(s);
-        //                }
-        //                RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
-        //                level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), int.Parse(levelInfo[2]), levelRatio, int.Parse(levelInfo[4]));
-        //                levelList.Add(level);
-        //            }
-        //            lineNum++;
-        //        }   
-        //        while (line != null);
-        //        reader.Close();
-        //    }
-        //    Debug.Log(levelList.Count);
-            return levelList;
-        //}
-        //catch(IOException e)
-        //{
-        //    Debug.Log(e);
-        //}
-        //return levelList;
     }
 
-    static public ArrayList readThemeFile(string filename)
+    static public void checkandCreateThemeFolder()
     {
-        Regex regExpression = new Regex(@"\w+|(\(?\d\,?\)?\/?)+",RegexOptions.IgnoreCase);
-        ArrayList themeArrayList = new ArrayList();
-        int lineNum = 0;
-        TextAsset themeFile = Resources.Load(filename) as TextAsset;
-        string[] splitThemeFile = themeFile.text.Split(new[] { '\r','\n'},System.StringSplitOptions.RemoveEmptyEntries);
-        foreach (string line in splitThemeFile)
+        DirectoryInfo ThemeFolder = new DirectoryInfo(FileIO.FILE_PATH_TO_THEME_FOLDER);
+        if(!ThemeFolder.Exists)
         {
-
-           // Debug.Log(line);
-            if (lineNum != 0)
-            {
-                line.Trim();
-                MatchCollection matches = regExpression.Matches(line);
-                List<Color> themeColorList = readColorRange(matches[2].Value);
-                Color UITextColor = readUIColor(matches[4].Value);
-                themeArrayList.Add(new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,UITextColor,bgImg : matches[3].Value));
-            }
-            lineNum++;
+            ThemeFolder.Create();
         }
-        return themeArrayList;
-    }
-
-    static private List<Color> readColorRange(string colorRangestring)
-    {
-        List<Color> colorList = new List<Color>();
-        string[] colorSplit = colorRangestring.Split('/');
-        for (int i = 0; i < colorSplit.Length; i++)
-        {
-            colorSplit[i] = colorSplit[i].Trim(')', '(');
-
-        }
-        foreach (string color in colorSplit)
-        {
-            string[] rgbv = color.Split(',');
-            Color temp = new Color(float.Parse(rgbv[0]), float.Parse(rgbv[1]), float.Parse(rgbv[2]), float.Parse(rgbv[3]));
-            colorList.Add(temp);
-        }
-
-        return colorList; 
-    }
-
-    static private Color readUIColor(string colorString)
-    {
-        colorString= colorString.Trim(')', '(');
-        string[] colorSplit = colorString.Split(',');
-        Color uiColor = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
-        //Debug.Log(uiColor);
-        return uiColor;
-
-    }
-
-    static public void writeTrialData(TrialStruct trialInfo,string currentTime)
-    {
-        string currentDate = System.DateTime.Now.ToString("yyyy-MM-dd");
-        //string currentTime = System.DateTime.Now.ToString("h-mm-ss");
-        string baseName = GameData.gamedata.currentParticipant.ID + "-" + GameData.gamedata.currentParticipant.SessionNumber + "-" +currentDate+"-"+ currentTime+".csv";
-        string Filename = Path.Combine(Application.persistentDataPath, Path.Combine("Trials", baseName));
-        StreamWriter writer;
-        if (!GameData.gamedata.isDemo)
-        {
-            if (!File.Exists(Filename))
-            {
-                using (writer = new StreamWriter(Filename, true))
-                {
-                    writer.WriteLine("Task Name , Task Version , OS Information , Screen Resolution, ParticipantID, Date When Game Started," +
-                        "Time When Game Started, Session,Level, Round Number, Trial Number, Accuracy, Reaction Time, Points Won,Response(R/L)," +
-                        "Size of/Num Of Element in Cloud 1 , Size of/Num Of Element in Cloud 2, Element sprite, Background,Total Number of Round,Total Play Time , Session Time," +
-                        "Difficulty, Effort");
-                }
-            }
-            else
-            {
-                using (writer = new StreamWriter(Filename, true))
-                {
-                    writer.WriteLine(trialInfo.ToString());
-                }
-            }
-        }
-
     }
 
     static public void checkAndCreateLanguageFolder()
@@ -220,7 +95,7 @@ public static class FileIO
 
     static public void checkAndCreateTrialFolder()
     {
-        string pathway = Path.Combine(Application.persistentDataPath, "Trials");
+        string pathway = Path.Combine(Application.persistentDataPath, "ParticipantData");
         DirectoryInfo prefFolder = new DirectoryInfo(pathway);
         if (!prefFolder.Exists)
         {
@@ -245,7 +120,7 @@ public static class FileIO
         else
         {
             string currentParticipant = readCurrentParticipant();
-            Debug.Log("who is the current participant: " + currentParticipant);
+            //Debug.Log("who is the current participant: " + currentParticipant);
             if(currentParticipant != "" && currentParticipant != null)
             {
                 string participantFilePathway = Path.Combine(Application.persistentDataPath, Path.Combine("Participants", currentParticipant + ".txt"));
@@ -274,7 +149,7 @@ public static class FileIO
                 do
                 {
                     line = reader.ReadLine();
-                    if (linenum != 0 && line != null)
+                    if (linenum != 0 && line != null && !line.Contains("***"))
                     {
                         line = line.Replace("/r", "").Replace("/n", "");
                         string[] prefInfo = line.Split(',');
@@ -311,30 +186,6 @@ public static class FileIO
         }
     }
 
-    static public ParticipantStruct readParticipantFile(string filepathway)
-    {
-        string line;
-        int linenumber = 0;
-        ParticipantStruct participant = new ParticipantStruct();
-        using (StreamReader reader = new StreamReader(filepathway))
-        {
-            do
-            {
-                Debug.Log("reading participant file");
-                line = reader.ReadLine();
-                if(linenumber != 0 && line != null)
-                {
-                    line = line.Replace("/r", "").Replace("/n", "");
-                    string[] participantInfo= line.Split(',');
-                    participant = setParticipantInfo(participantInfo, participant);
-                }
-                linenumber++;
-            }
-            while (line != null);
-        }
-        return participant;
-    }
-
     static public void writeParticipantFile(ParticipantStruct participant ,bool isDemo = false)
     {
         Debug.Log("writing to participant file");
@@ -355,36 +206,6 @@ public static class FileIO
             writer.WriteLine(participant.ToString());
         }
 
-    }
-
-    static public string readCurrentParticipant()
-    {
-        string currentParticipant =Path.Combine(Application.persistentDataPath, Path.Combine("Participants", "CurrentParticipant.txt"));
-        string line = "";
-        try
-        {
-            StreamReader reader = new StreamReader(currentParticipant);
-            using (reader)
-            {
-                line = reader.ReadLine();
-                if (line != null)
-                {
-                    line.Replace("\n", "").Replace("\r", "");
-                    if (line != null)
-                    {
-                        return line;
-                    }
-                }
-
-            }
-        }
-
-        catch (IOException e)
-        {
-            Debug.Log(e);
-        }
-
-        return line;
     }
 
     static public void writeCurrentParticipant(string participantID)
@@ -437,22 +258,22 @@ public static class FileIO
 
     static private void writeEnglishFile()
     {
-        string filepath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages","English.txt"));
-        string[] englishText = { "START", "DEMO", "GO!", "DONE", "MAIN MENU", "LEVEL","xxx% correct",
-        "Average Reaction Time: xxx seconds","Perfect Score Bonus: xxx","Points:xxx","How much did you like the game today?",
+        string filepath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages", "English.txt"));
+        string[] englishText = { "START", "DEMO", "NEXT", "GO!", "DONE", "MAIN MENU", "LEVEL","xxx % correct",
+        "Average Reaction Time: xxx seconds","Perfect Score Bonus: xxx","Points: xxx","How much did you like the game today?",
         "I really liked the game", "the game was okay","I did not like the game","How hard did you try today?","I tried my best",
         "I tried a little","I did not try","You got xxx points today!","You have xxx points so far!"};
 
-        if(!File.Exists(filepath))
+        if (!File.Exists(filepath))
         {
             using (StreamWriter writer = new StreamWriter(filepath))
             {
-                foreach(string s in englishText)
+                foreach (string s in englishText)
                     writer.WriteLine(s, true);
             }
         }
     }
-    
+
     static public List<string> searchandFilterForLanguageFile()
     {
         string[] LanguageFiles = Directory.GetFiles(FileIO.FILE_PATH_TO_LANGAUGE_FOLDER, "*.txt");
@@ -472,27 +293,35 @@ public static class FileIO
         return AcceptedLanguage;
     }
 
-    static public Dictionary<string,string> readLanguageFile(string languageName)
+    static public ArrayList searchandFilterForThemeFolder()
     {
-        string[] arrayOfKey = 
-            { "START", "DEMO", "GO!", "DONE", "MAIN MENU", "LEVEL","correct",
-        "Average Reaction Time","Perfect Score Bonus","Points","Question1",
-        "Q1res1", "Q1res2","Q1res3","Question2","Q2res1",
-        "Q2res2","Q2res3","PointsToday","PointsSoFar"};
-        string[] allLine;
-        Dictionary<string, string> translatedDictionary = new Dictionary<string, string>();
-        string languageFilePath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages", languageName + ".txt"));
-
-        allLine = File.ReadAllLines(languageFilePath,Encoding.GetEncoding("iso-8859-1"));
-        
-        for(int i = 0; i < allLine.Length && i < arrayOfKey.Length; i++)
+        ArrayList themeFolders = new ArrayList();
+        DirectoryInfo RootThemeFolder = new DirectoryInfo(FileIO.FILE_PATH_TO_THEME_FOLDER);
+        DirectoryInfo[] allThemeFolder = RootThemeFolder.GetDirectories();
+        if (RootThemeFolder.Exists)
         {
-            translatedDictionary[arrayOfKey[i]] = allLine[i];
+            foreach (DirectoryInfo dir in allThemeFolder)
+            {
+                if (searchAndCheckAllThemeFolder(dir.FullName))
+                {
+                   //Debug.Log(dir.Name);
+                   themeFolders.Add(dir.Name);
+                }
+
+            }
         }
+        GameData.gamedata.haveThemes = themeFolders.Count > 0 ? true : false;
+        return themeFolders;
+    }
 
-        return translatedDictionary;
-
-
+    static private bool searchAndCheckAllThemeFolder(string themeFolder)
+    {
+        DirectoryInfo targetFolder = new DirectoryInfo(themeFolder);
+        if(targetFolder.GetFiles("*.jpg").Length == 1 && targetFolder.GetFiles("*.txt").Length == 1 && targetFolder.GetFiles("*.png").Length == 1)
+        {
+            return true;
+        }
+        return false;
 
 
     }
@@ -531,12 +360,495 @@ public static class FileIO
         return playerPref;
     }
 
+    static public ThemeStruct returnThemeInFolder(string themefolder)
+    {
+        string pathway = Path.Combine(FileIO.FILE_PATH_TO_THEME_FOLDER, Path.Combine(themefolder, "ThemeParameter.txt"));
+       // Debug.Log("this should point to the folders theme txt: "+pathway);
+        if(File.Exists(pathway))
+        {
+            return readThemeFile(pathway);
+        }
+        else
+        {
+            Debug.Log("Does not exist");
+        }
+        return new ThemeStruct();
+    }
+
+    static public List<LevelStruct> returnLevelInFolder()
+    {
+        string pathway = Path.Combine(FileIO.FILE_PATH_TO_LEVEL_FOLDER, "Levels.txt");
+        if(File.Exists(pathway))
+        {
+            GameData.gamedata.haveLevels = true;
+            return readLevelFile(pathway);
+        }
+        else
+        {
+            Debug.Log("Does not exist");
+            GameData.gamedata.haveLevels = false;
+        }
+
+        return new List<LevelStruct>();
+    }
+    
+    static  public Sprite returnSpriteInfolder(string themefolder, string filename)
+    {
+       // Debug.Log("atempting to retrive sprite from folder");
+        string pathway;
+        if (filename == "background")
+        {
+            pathway = Path.Combine(FileIO.FILE_PATH_TO_THEME_FOLDER, Path.Combine(themefolder, filename + ".jpg"));
+        }
+        else
+        {
+            pathway = Path.Combine(FileIO.FILE_PATH_TO_THEME_FOLDER, Path.Combine(themefolder, filename + ".png"));
+        }
+        if(File.Exists(pathway))
+        {
+           // Debug.Log("image found");
+            return LoadImageAsSprite(pathway);
+        }
+        else
+        {
+            Debug.Log("file does not exist");
+            return null;
+        }
+    }
+
     static public string returnPathWayToCurrentParticipantFile()
     {
         string currentParticipantFilePath = Path.Combine(Application.persistentDataPath, Path.Combine("Participants", readCurrentParticipant() + ".txt"));
         return currentParticipantFilePath;
     }
 
+    static public string readCurrentParticipant()
+    {
+        string currentParticipant =Path.Combine(Application.persistentDataPath, Path.Combine("Participants", "CurrentParticipant.txt"));
+        string line = "";
+        try
+        {
+            StreamReader reader = new StreamReader(currentParticipant);
+            using (reader)
+            {
+                line = reader.ReadLine();
+                if (line != null && !line.Contains("***"))
+                {
+                    line.Replace("\n", "").Replace("\r", "");
+                    if (line != null)
+                    {
+                        return line;
+                    }
+                }
+
+            }
+        }
+
+        catch (IOException e)
+        {
+            Debug.Log(e);
+        }
+
+        return line;
+    }
+    
+    static public void DirectoryCopy(string sourceDir,string destdir)
+    {
+        DirectoryInfo sourceDirectory = new DirectoryInfo(sourceDir);
+
+        if(!sourceDirectory.Exists)
+        {
+            throw new DirectoryNotFoundException
+                ("Source directory does not exist or could not be found: "
+                + sourceDir
+                );
+        }
+        if(!Directory.Exists(destdir))
+        {
+            Directory.CreateDirectory(destdir);
+        }
+        DirectoryInfo[] dirsInSource = sourceDirectory.GetDirectories();
+        FileInfo[] files = sourceDirectory.GetFiles();
+        foreach(FileInfo file in files)
+        {
+            string temppath = Path.Combine(destdir, file.Name);
+            file.CopyTo(temppath, true);
+        }
+
+        foreach(DirectoryInfo subdir in dirsInSource)
+        {
+            string temppath = Path.Combine(destdir, subdir.Name);
+            DirectoryCopy(subdir.FullName, temppath);
+        }
+
+    }
+
+    // functions used to populate the language, theme , and level folder in file structure along with functions that used the WWW class to access streamming assets
+    //static public void moveStreamingAssets(Dictionary<string, string> assetDirectory)
+    //{
+    //    foreach (KeyValuePair<string, string> pair in assetDirectory)
+    //    {
+
+    //        string pathwaySrc = Application.streamingAssetsPath + "/Background/" + pair.Key + "/" + pair.Value;
+    //        Debug.Log(pathwaySrc);
+    //        string pathwayTrg = FileIO.FILE_PATH_TO_THEME_FOLDER + @"\" + pair.Key.ToString() + @"\" + pair.Value.ToString();
+    //        pathwayTrg= pathwayTrg.Replace("\n", "").Replace("\r", "");
+    //        Debug.Log(pathwayTrg);
+    //        WWW reader = new WWW(pathwaySrc);
+    //        while (!reader.isDone) { }
+    //        if (!File.Exists(pathwayTrg))
+    //        {
+    //            if (pathwayTrg.Contains(".txt"))
+    //            {
+    //                File.Create(pathwayTrg).Dispose();
+    //            }
+
+    //            if(pathwayTrg.Contains(".png"))
+    //            {
+
+    //            }
+    //        }
+    //        File.WriteAllBytes(pathwayTrg, reader.bytes);
+    //        reader.Dispose();
+    //    }
+    //}
+
+    //static public Dictionary<string, string> readStreamingAssetDirectory()
+    //{
+    //    Dictionary<string, string> fileDirectory = new Dictionary<string, string>();
+    //    string pathway = Path.Combine(Application.streamingAssetsPath, "directory.txt");
+    //    WWW reader = new WWW(pathway);
+    //    while (!reader.isDone) { }
+    //    string filecontent = reader.text.Trim();
+    //    string[] splitContent = filecontent.Split('\n');
+
+    //    foreach (string s in splitContent)
+    //    {
+    //        string[] tempSplit = s.Split(',');
+    //       // Debug.Log(tempSplit[0] + "," + tempSplit[1]);
+    //        fileDirectory[tempSplit[0]] = tempSplit[1];
+    //    }
+    //    return fileDirectory;
+
+    //}
+
+    //static private IEnumerator readingDirectory()
+    //{
+    //    string pathway = Path.Combine(Application.streamingAssetsPath, "directory.txt");
+    //    WWW reader = new WWW(pathway);
+    //    yield return reader;
+    //    Debug.Log(reader.text);
+
+    //}
+    //static public void populateThemeFolder()
+    //{
+    //    string pathwayToDefaultTheme = Path.Combine(Application.streamingAssetsPath, "Background");
+    //    Debug.Log(pathwayToDefaultTheme);
+    //    if(pathwayToDefaultTheme.Contains(":///") )
+    //    {
+    //        if (File.Exists(pathwayToDefaultTheme))
+    //        {
+    //            Debug.Log("Streaming asset folder exist!");
+    //            WWW www = new WWW(pathwayToDefaultTheme);
+    //            Debug.Log("created www object");
+    //            while (!www.isDone) ;
+    //            Debug.Log("finsish streaming www");
+    //            if (string.IsNullOrEmpty(www.error))
+    //            {
+    //                Debug.Log("File exist and trying to write www to folder");
+    //                File.WriteAllBytes(FileIO.FILE_PATH_TO_THEME_FOLDER, www.bytes);
+    //            }
+    //            else
+    //            {
+    //                Debug.Log(www.error);
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+
+    //        DirectoryCopy(pathwayToDefaultTheme,FileIO.FILE_PATH_TO_THEME_FOLDER);
+    //    }
+    //}
+
+    //static public void populateLevelFolder()
+    //{
+    //    string pathwayToDefaultLevel = Path.Combine(Application.streamingAssetsPath, "Level");
+    //    Debug.Log(pathwayToDefaultLevel);
+    //    if(pathwayToDefaultLevel.Contains("://") )
+    //    {
+    //        if (File.Exists(pathwayToDefaultLevel))
+    //        {
+    //            Debug.Log("Streaming asset folder exist!");
+    //            WWW www = new WWW(pathwayToDefaultLevel);
+    //            Debug.Log("created www object");
+    //            while (!www.isDone) ;
+    //            Debug.Log("finsish streaming www");
+    //            if (string.IsNullOrEmpty(www.error))
+    //            {
+    //                Debug.Log("File exist and trying to write www to folder");
+    //                File.WriteAllBytes(FileIO.FILE_PATH_TO_LEVEL_FOLDER, www.bytes);
+    //            }
+    //            else
+    //            {
+    //                Debug.Log(www.error);
+    //            }
+    //        }
+    //    }
+    //    else
+    //    {
+
+    //        DirectoryCopy(pathwayToDefaultTheme,FileIO.FILE_PATH_TO_THEME_FOLDER);
+    //    }
+    //}
+
+    //static public void populateLanguageFolder()
+    //{
+    //    string pathwayToDefaultLevel = Path.Combine(Application.dataPath, Path.Combine("Default", "Language"));
+    //    DirectoryCopy(pathwayToDefaultLevel, FileIO.FILE_PATH_TO_LANGAUGE_FOLDER);
+    //}
+
+    static public ParticipantStruct readParticipantFile(string filepathway)
+    {
+        string line;
+        ParticipantStruct participant = new ParticipantStruct();
+        using (StreamReader reader = new StreamReader(filepathway))
+        {
+            do
+            {
+                line = reader.ReadLine();
+                Debug.Log(line);
+                if(line != null && !line.Contains("ID") && !line.Contains("***"))
+                {
+                    line = line.Replace("/r", "").Replace("/n", "");
+                    string[] participantInfo = line.Split(',');
+                    participant = setParticipantInfo(participantInfo, participant);
+                }
+            }
+            while (line != null);
+        }
+        return participant;
+    }
+
+    static public List<LevelStruct> readLevelFile(string filename)
+    {
+        List<LevelStruct> levelList = new List<LevelStruct>();
+        string line;
+        //Debug.Log("Loading file");
+        //TextAsset levelFile= Resources.Load(filename) as TextAsset;
+        //string[] splitLevelFile = levelFile.text.Split("\n"[0]);
+        //foreach(string levelInfo in splitLevelFile)
+        //{
+        //    if(lineNum != 0)
+        //    {
+        //        LevelStruct level;
+        //        string[] individualLevelInfo = levelInfo.Split(","[0]);
+        //        RatioStruct levelRatio = new RatioStruct(int.Parse(individualLevelInfo[3].Split('/')[0]), int.Parse(individualLevelInfo[3].Split('/')[1]));
+        //        level = new LevelStruct(int.Parse(individualLevelInfo[0]), int.Parse(individualLevelInfo[1]), int.Parse(individualLevelInfo[2]), levelRatio);
+        //        levelList.Add(level);
+        //    }
+        //    lineNum++;
+        //}
+        try
+        {
+            StreamReader reader = new StreamReader(filename);
+            using (reader)
+            {
+                do
+                {
+                //    Debug.Log("reading files");
+                    line = reader.ReadLine();
+                    if (line != null && !line.Equals("") && !line.Contains("***") && !line.Contains("LevelNumber")) 
+                    {
+                        LevelStruct level;
+                      //  Debug.Log("this is the level line: " + line);
+                        string[] levelInfo = line.Split(new[] { ',' },System.StringSplitOptions.RemoveEmptyEntries);
+                       // Debug.Log("this is the levels ratio" + levelInfo[3]);
+                        RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
+                        level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), int.Parse(levelInfo[2]), levelRatio);
+                        levelList.Add(level);
+                    }
+                }
+                while (line != null);
+                reader.Close();
+            }
+            //Debug.Log(levelList.Count);
+            return levelList;
+        }
+        catch (IOException e)
+        {
+            Debug.Log(e);
+        }
+        return levelList;
+    }
+
+    static public Dictionary<string,string> readLanguageFile(string languageName)
+    {
+        string[] arrayOfKey = 
+            { "START", "DEMO","NEXT","GO!", "DONE", "MAIN MENU", "LEVEL","correct",
+        "AvgReact","BonusPoints","Points","Question1",
+        "Q1res1", "Q1res2","Q1res3","Question2","Q2res1",
+        "Q2res2","Q2res3","PointsToday","PointsSoFar"};
+
+        string[] allLine;
+        Dictionary<string, string> translatedDictionary = new Dictionary<string, string>();
+        string languageFilePath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages", languageName + ".txt"));
+
+        allLine = File.ReadAllLines(languageFilePath,Encoding.GetEncoding("iso-8859-1"));
+        
+        for(int i = 0; i < allLine.Length && i < arrayOfKey.Length; i++)
+        {
+            if (!allLine[i].Contains("***"))
+            {
+                translatedDictionary[arrayOfKey[i]] = allLine[i];
+            }
+        }
+
+        return translatedDictionary;
+
+
+
+
+    }
+
+    static public ThemeStruct readThemeFile(string filename)
+    {
+        Regex regExpression = new Regex(@"\w+|(\(?\d\,?\)?\/?)+",RegexOptions.IgnoreCase);
+        ThemeStruct newTheme = new ThemeStruct();
+        string line;
+        //TextAsset themeFile = Resources.Load(filename) as TextAsset;
+        
+        try
+        {
+            using (StreamReader reader = new StreamReader(filename))
+            {
+                do
+                {
+                    line = reader.ReadLine();
+                    //Debug.Log("this is the single line in the theme file: "+line);
+                    if (line !=null && !line.Contains("ThemeName")&& !line.Contains("***"))
+                    {
+                        MatchCollection matches = regExpression.Matches(line);
+                        //Debug.Log("Match count: " + matches.Count);
+                        foreach(Match match in matches)
+                        {
+                      //      Debug.Log(match.Value);
+                        }
+                        List<Color> themeColorList = readColorRange(matches[2].Value);
+                        Color UITextcolor = readUIColor(matches[4].Value);
+                        return newTheme = new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,UITextcolor,bgImg : matches[3].Value);
+                    }
+                }
+                while (line != null);
+            }
+        }
+
+        catch(IOException e)
+        {
+            Debug.Log(e);
+        }
+        return newTheme;
+        /*
+        string[] splitThemeFile = themeFile.text.Split(new[] { '\r','\n'},System.StringSplitOptions.RemoveEmptyEntries);
+        foreach (string line in splitThemeFile)
+        {
+
+           // Debug.Log(line);
+            if (lineNum != 0)
+            {
+                line.Trim();
+                MatchCollection matches = regExpression.Matches(line);
+                List<Color> themeColorList = readColorRange(matches[2].Value);
+                Color UITextColor = readUIColor(matches[4].Value);
+                themeArrayList.Add(new ThemeStruct(matches[0].Value,matches[1].Value,themeColorList,UITextColor,bgImg : matches[3].Value));
+            }
+            lineNum++;
+        }
+        */
+    }
+    
+    static private Texture2D LoadTexture(string filepath)
+    {
+        Texture2D image;
+        byte[] FileData;
+        if(File.Exists(filepath))
+        {
+            FileData = File.ReadAllBytes(filepath);
+            image = new Texture2D(2, 2);
+            if(image.LoadImage(FileData))
+            {
+                return image;
+            }
+        }
+        return null;
+    }
+
+    static private Sprite LoadImageAsSprite(string filepath , float pixelPerUnit = 100.0f)
+    {
+        Sprite newImageSprite = new Sprite();
+        Texture2D imageTexture = LoadTexture(filepath);
+        newImageSprite = Sprite.Create(imageTexture, new Rect(0, 0, imageTexture.width, imageTexture.height), new Vector2(.5f,.5f), pixelPerUnit);
+        //Debug.Log("sucessfully read and converted the sprite image");
+        return newImageSprite;
+    }
+
+    static private List<Color> readColorRange(string colorRangestring)
+    {
+        List<Color> colorList = new List<Color>();
+        string[] colorSplit = colorRangestring.Split('/');
+        for (int i = 0; i < colorSplit.Length; i++)
+        {
+            colorSplit[i] = colorSplit[i].Trim(')', '(');
+
+        }
+        foreach (string color in colorSplit)
+        {
+            string[] rgbv = color.Split(',');
+            Color temp = new Color(float.Parse(rgbv[0]), float.Parse(rgbv[1]), float.Parse(rgbv[2]), float.Parse(rgbv[3]));
+            colorList.Add(temp);
+        }
+
+        return colorList; 
+    }
+
+    static private Color readUIColor(string colorString)
+    {
+        colorString= colorString.Trim(')', '(');
+        string[] colorSplit = colorString.Split(',');
+        Color uiColor = new Color(float.Parse(colorSplit[0]), float.Parse(colorSplit[1]), float.Parse(colorSplit[2]));
+        //Debug.Log(uiColor);
+        return uiColor;
+
+    }
+
+    static public void writeTrialData(TrialStruct trialInfo,string currentTime)
+    {
+        string currentDate = System.DateTime.Now.ToString("yyyy-MM-dd");
+        string baseName = GameData.gamedata.currentParticipant.ID + "-" + GameData.gamedata.currentParticipant.SessionNumber + "-" +currentDate+"-"+ currentTime+".csv";
+        string Filename = Path.Combine(Application.persistentDataPath, Path.Combine("ParticipantData", baseName));
+        StreamWriter writer;
+        if (!GameData.gamedata.isDemo)
+        {
+            if (!File.Exists(Filename))
+            {
+                using (writer = new StreamWriter(Filename, true))
+                {
+                    writer.WriteLine("Task Name , Task Version , OS Information , Screen Resolution, ParticipantID, Date When Game Started," +
+                        "Time When Game Started, Session,Level, Round Number, Trial Number, Accuracy,Correct Answer, Reaction Time, Points Won,Response(R/L)," +
+                        "Num Of Elements in Cloud 1 , Num Of Elements in Cloud 2, Element sprite, Background,Total Number of Round,Total Play Time , Session Time," +
+                        "Difficulty, Effort");
+                }
+            }
+            else
+            {
+                using (writer = new StreamWriter(Filename, true))
+                {
+                    writer.WriteLine(trialInfo.ToString());
+                }
+            }
+        }
+
+    }
 
 
 }

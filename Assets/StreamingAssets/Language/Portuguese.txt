@@ -1,0 +1,20 @@
+INÍCIO
+DEMO
+GO!
+FIM
+MENU PRINCIPAL
+Nível
+xxx % correto
+Tempo de reação - média: xxx segundos
+Bônus para pontuação perfeita: xxx
+Pontos:xxx
+O quanto você gostou do jogo hoje?
+Eu gostei muito do jogo
+O jogo estava ok
+Eu não gostei do jogo
+O quanto você se esforçou hoje?
+Eu tentei o meu melhor
+Eu tentei um pouquinho
+Eu não tentei
+Você conseguiu xxx pontos hoje!
+Você tem xxx pontos até agora!

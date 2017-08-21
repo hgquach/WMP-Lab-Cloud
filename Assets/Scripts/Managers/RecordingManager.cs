@@ -13,6 +13,7 @@ public class RecordingManager : MonoBehaviour
     {
         sessionmanager = GameObject.FindGameObjectWithTag("SessionManager").GetComponent<SessionManager>();
         roundmanager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
+
     }
     public void StartRecording()
     {
@@ -28,6 +29,7 @@ public class RecordingManager : MonoBehaviour
             GameData.gamedata.trialData.RoundLimit = GameData.gamedata.SessionPreferance.RoundLimit;
             GameData.gamedata.trialData.TimeLimit = 0;
         }
+        GameData.gamedata.trialData.Answer = roundmanager.CorrectAnswer.ToString();
         GameData.gamedata.trialData.Session = GameData.gamedata.currentParticipant.SessionNumber;
         GameData.gamedata.trialData.RoundNumber = sessionmanager.getCurrentRound();
         GameData.gamedata.trialData.Level = sessionmanager.getCurrentLevel();
@@ -35,7 +37,7 @@ public class RecordingManager : MonoBehaviour
         GameData.gamedata.trialData.Date = System.DateTime.Now.ToString("yyyy-MM-dd");
         GameData.gamedata.trialData.Time = System.DateTime.Now.ToString("h:mm:ss");
         GameData.gamedata.trialData.TrialNumber = roundmanager.getCurrentTrial();
-        GameData.gamedata.trialData.Dot = roundmanager.dotSprite;
+        GameData.gamedata.trialData.Dot = sessionmanager.roundTheme.dotShape;
         GameData.gamedata.trialData.Theme = sessionmanager.roundTheme.levelName;
         GameData.gamedata.trialData.Response = roundmanager.userChoice.ToString();
         GameData.gamedata.trialData.sizeLeftCloud = roundmanager.dotPerSide.cloud1;
@@ -49,7 +51,7 @@ public class RecordingManager : MonoBehaviour
     public void StopRecording()
     {
         this.trialEndTime = Time.time;
-        GameData.gamedata.trialData.accuracy = roundmanager.checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice).ToString();
+        GameData.gamedata.trialData.accuracy = roundmanager.checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice) ? "1" : "0";
         if( roundmanager.checkAnswer(roundmanager.CorrectAnswer,roundmanager.userChoice))
         {
             GameData.gamedata.trialData.Point = sessionmanager.getCurrentLevel() ;

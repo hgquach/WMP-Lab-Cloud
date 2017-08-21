@@ -67,6 +67,7 @@ public class Survey : MonoBehaviour {
         }
 
     }
+
     private void CreateLikertScale()
     {
         this.likertscale = Instantiate(LikertScale) as GameObject;
@@ -74,11 +75,12 @@ public class Survey : MonoBehaviour {
         likertscale.name = "likertscale";
         doneButton.onClick.RemoveAllListeners();
         doneButton.onClick.AddListener(returnLikertScaleChoice);
-        
+        this.likertscale.transform.GetChild(0).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q1res1"];
+        this.likertscale.transform.GetChild(1).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q1res2"];
+        this.likertscale.transform.GetChild(2).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q1res3"];
     }
 
-    private void removeLikertScale()
-    {
+    private void removeLikertScale() {
         this.likertscale.transform.SetParent(null);
         Destroy(this.likertscale);
     }
@@ -173,6 +175,7 @@ public class Survey : MonoBehaviour {
 
 
     }
+
     private void CreateEffortScale()
     {
         this.effortscale = Instantiate(EffortScale) as GameObject;
@@ -180,6 +183,9 @@ public class Survey : MonoBehaviour {
         effortscale.name = "effortscale";
         doneButton.onClick.RemoveAllListeners();
         this.doneButton.onClick.AddListener(this.returnEffortScaleChoice);
+        this.effortscale.transform.GetChild(0).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q2res1"];
+        this.effortscale.transform.GetChild(1).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q2res2"];
+        this.effortscale.transform.GetChild(2).GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["Q2res3"];
     }
     
     private void updateQuestionString(int questionNumber)

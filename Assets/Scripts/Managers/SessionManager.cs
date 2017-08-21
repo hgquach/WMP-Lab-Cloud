@@ -6,9 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class SessionManager : MonoBehaviour {
 
-    private GameObject surveyObj;
+    private GameObject surveyObj, SessionTextObj;
     private TextUpdate textupdate;
-    private GameObject SessionTextObj;
     private RoundManager roundManager;
     public SpriteRenderer background;
     private Timer timer;
@@ -25,11 +24,10 @@ public class SessionManager : MonoBehaviour {
     [SerializeField]
     public float timeRoundstart;
     [SerializeField]
-    private int currentLevel , currentTheme;
+    private int currentLevel , currentTheme,totalPointsInSess;
     public ThemeStruct roundTheme;
     public LevelStruct roundLevel;
     public bool isLevelDisplay;
-    private int totalPointsInSess;
     void Awake()
     {
         if(GameData.gamedata.isDemo)
@@ -60,43 +58,34 @@ public class SessionManager : MonoBehaviour {
                 GameData.gamedata.trialData.RoundLimit = 120;
                 this.timeLimit = 120f;
             }
-            GameObject timerObject = (GameObject)Instantiate(Resources.Load("Timer"));
-            timer = timerObject.GetComponent<Timer>();
-            timer.setTimeLeft(this.timeLimit);
-            roundManager.isTimed = true;
+
+            this.setupTimer();
         }
     }
 
     void Update()
     {
-        //Debug.Log("current level is: " + currentLevel);
-        //Debug.Log(string.Format("{0}correct so far {1} trials so far", roundManager.getCorrectSoFar(),roundManager.getTrialSoFar()));
-        if (!roundManager.getRoundStart() && !this.isLevelDisplay)
+        //Debug.Log(roundManager.getRoundStart().ToString() + this.isLevelDisplay.ToString());
+        if (roundManager.getRoundStart() && !this.isLevelDisplay)
         {
-            if (this.currentRound % GameData.gamedata.SessionPreferance.ThemeChange == 0)
+            //Debug.Log("new round");
+            if (this.currentRound % GameData.gamedata.SessionPreferance.ThemeChange == 0 && this.currentRound != 1)
             {
-                if (this.currentTheme < GameData.gamedata.sessionTheme.Count - 1)
-                {
-                    this.currentTheme += 1;
-                }
-                else
-                {
-                    this.currentTheme = 0;
-                }
-            }
-            if (this.currentRound != 1)
-            {
-                this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count-1,
+                this.currentTheme = this.themeChange(this.currentTheme, GameData.gamedata.sessionTheme.Count-1);
+
+                this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count,
                     this.currentLevel, roundManager.accuracySoFar, GameData.gamedata.SessionPreferance.MinError,
                     GameData.gamedata.SessionPreferance.MaxError);
             }
-            // the adjustment is for indexing the array
-            int adjustLevel = this.currentLevel - 1;
-            roundLevel = GameData.gamedata.sessionLevels[adjustLevel];
-            this.roundTheme = (ThemeStruct)GameData.gamedata.sessionTheme[this.currentTheme];
+            Debug.Log("this is updated level: "+this.currentLevel);
+            // adjust for zero based indexing
+            this.roundLevel = GameData.gamedata.sessionLevels[this.currentLevel-1];
+            this.roundTheme = FileIO.returnThemeInFolder((string)GameData.gamedata.sessionTheme[this.currentTheme]);
             this.textupdate.updateTextColor(this.roundTheme.UIColor);
-            background.sprite = Resources.Load<Sprite>("Background/" + this.roundTheme.backgroundImage);
+            background.sprite = FileIO.returnSpriteInfolder((string)GameData.gamedata.sessionTheme[this.currentTheme],"background");
             background.GetComponent<BackgroundResize>().resizeBackGround();
+
+            this.timeRoundstart = Time.time;
             if (this.isTimedSession)
             {
                 if (!timer.CheckTime())
@@ -110,7 +99,6 @@ public class SessionManager : MonoBehaviour {
             }
             else
             {
-
                 this.createNumberOfRounds(this.currentRound, this.maxRound, roundLevel, roundTheme);
             }
         }
@@ -148,7 +136,6 @@ public class SessionManager : MonoBehaviour {
         textupdate.updateRoundTitle(level);
         roundManager.clearTrialScreen();
         yield return new WaitForSecondsRealtime(1f);
-        this.timeRoundstart = Time.time;
         textupdate.displayText();
         sceneController.showCanvas();
         sceneController.assignContinueLevel();
@@ -165,7 +152,9 @@ public class SessionManager : MonoBehaviour {
         {
             LevelStruct tempLevel = currentLevel;
             ThemeStruct tempTheme = roundTheme;
-            this.UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), GameData.gamedata.SessionPreferance.trialsPerRd, tempTheme.dotShape, tempLevel.dotMax, tempLevel.spread);
+            Debug.Log("level spread: "+tempLevel.spread);
+            this.UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), GameData.gamedata.SessionPreferance.trialsPerRd, tempTheme.dotShape
+                , tempLevel.dotMax, tempLevel.spread);
             StartCoroutine(this.waitDisplay(tempLevel.levelNum));
         }
         else
@@ -181,23 +170,37 @@ public class SessionManager : MonoBehaviour {
         //Debug.Log(minErrorPercent.ToString() + "," + maxErrorPercent.ToString());
         if(currentAccuracy > maxErrorPercent)
         {
-            if ( (currentLevel + 1) < levelLength)
+            if ( (currentLevel + 1) <= levelLength)
             {
-                currentLevel++;
+                ++currentLevel;
             }
         }
-        // the min error you can make to move down
         else if ( currentAccuracy <= minError)
         {
             if((currentLevel- 1) > 0)
             {
-                currentLevel--;
+                --currentLevel;
             }
         }
+        
         return currentLevel;
 
 
 
+    }
+
+    private int themeChange(int currentThemeIndex , int adjustTotalThemeCount)
+    {
+        if (currentThemeIndex < adjustTotalThemeCount)
+        {
+            currentThemeIndex += 1;
+        }
+        else
+        {
+            currentThemeIndex = 0;
+        }
+
+        return currentThemeIndex;
     }
 
     private void createTimeLimitRounds(LevelStruct currentLevel , ThemeStruct roundTheme)
@@ -248,26 +251,31 @@ public class SessionManager : MonoBehaviour {
         textupdate.displayText();
         yield return new WaitForSecondsRealtime(1f);
         sceneController.showCanvas();
+        yield return new WaitForSecondsRealtime(30f);
+        Application.Quit();
     }
 
     public void runPointSummary()
     {
         StartCoroutine(displayPointSummary());
     }
+
     private void Assignment()
     {
         this.currentTheme = (GameData.gamedata.currentParticipant.Theme == 0) ? 0 : GameData.gamedata.currentParticipant.Theme;
-        this.isTimedSession = GameData.gamedata.SessionPreferance.IsTimed;
+        this.currentLevel = (GameData.gamedata.currentParticipant.Level == 0) ? 1 : GameData.gamedata.currentParticipant.Level;
+
         this.roundManager = GameObject.FindGameObjectWithTag("RoundManager").GetComponent<RoundManager>();
         this.SessionTextObj = GameObject.FindGameObjectWithTag("LevelText");
         this.textupdate = SessionTextObj.GetComponent<TextUpdate>();
         this.background = GameObject.FindGameObjectWithTag("BackgroundCamera").GetComponentInChildren<SpriteRenderer>();
-        this.currentRound = 1;
-        this.currentLevel = (GameData.gamedata.currentParticipant.Level == 0) ? 1 : GameData.gamedata.currentParticipant.Level;
         this.sceneController = GameObject.FindGameObjectWithTag("GameSceneController").GetComponent<GameSceneController>();
         this.surveyObj = GameObject.FindGameObjectWithTag("Survey");
+
         this.isLevelDisplay = false;
+        this.isTimedSession = GameData.gamedata.SessionPreferance.IsTimed;
         this.totalPointsInSess = 0;
+        this.currentRound = 1;
     }
     
     public int getTotalPointsSes ()
@@ -279,5 +287,14 @@ public class SessionManager : MonoBehaviour {
     {
         this.totalPointsInSess += points;
     }
+
+    private void setupTimer()
+    {
+        GameObject timerObject = (GameObject)Instantiate(Resources.Load("Timer"));
+        timer = timerObject.GetComponent<Timer>();
+        timer.setTimeLeft(this.timeLimit);
+        roundManager.isTimed = true;
+    }
+
 
 }

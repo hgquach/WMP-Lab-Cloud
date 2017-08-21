@@ -25,6 +25,7 @@ public class GameSceneController : MonoBehaviour {
     {
        // Debug.Log(mainCanvas.enabled);
     }
+
     public void hideCanvas()
     {
         if(this.mainCanvas.enabled == true)
@@ -65,6 +66,7 @@ public class GameSceneController : MonoBehaviour {
 
     public void assignContinueAfterCoinSummary()
     {
+        goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["DONE"];
         goButton.onClick.RemoveAllListeners();
         goButton.onClick.AddListener(continueAfterCoinSummary);
     }
@@ -79,15 +81,14 @@ public class GameSceneController : MonoBehaviour {
     private void continueLevel()
     {
         this.hideCanvas();
-        roundmanager.roundStart();
-       // sessionmanager.isLevelDisplay = false;
         textupdate.hideText();
+        roundmanager.roundStart();
+
     }
 
     private void continueAfterFeedBack()
     {
         this.hideCanvas();
-        roundmanager.startTime = Time.time;
         textupdate.hideText();
         roundmanager.resetForNewRound();
 
@@ -108,7 +109,7 @@ public class GameSceneController : MonoBehaviour {
         this.roundmanager = roundManagerObject.GetComponent<RoundManager>();
         this.sessionmanager = sessionManagerObject.GetComponent<SessionManager>();
         this.mainCanvas = gameObject.GetComponent<Canvas>();
-        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["GO!"];
+        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["NEXT"];
 
     }
 }
