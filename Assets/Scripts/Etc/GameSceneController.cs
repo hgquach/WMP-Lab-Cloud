@@ -11,7 +11,6 @@ public class GameSceneController : MonoBehaviour {
     private TextUpdate textupdate;
     public GameObject roundManagerObject;
     public GameObject sessionManagerObject;
-
     private RoundManager roundmanager;
     private SessionManager sessionmanager;
     private Canvas mainCanvas;

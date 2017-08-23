@@ -5,7 +5,8 @@ using UnityEngine;
 using System.IO;
 
 public class PreferanceMenu : MonoBehaviour {
-	public InputField Participant, LimitField , ThemeChangeField, MaxError,MinError, TrialPerRd;
+#region class public and private variables 
+    public InputField Participant, LimitField , ThemeChangeField, MaxError,MinError, TrialPerRd;
     public Toggle RoundField , TimedField, SurveyField;
     public Button ApplyButton,ExitButton;
     public Dropdown languageDropDown;
@@ -15,15 +16,15 @@ public class PreferanceMenu : MonoBehaviour {
     private int roundLimit,themeChange,maxE,minE, trialPerRd;
     private List<string> avaiableLanguage;
     private Canvas MainMenuCanvas;
-
+#endregion
 
     void Start()
     {
         this.Assignment();
         this.addListeners();
     }
-	
-	private void onUpdateID(string arg0)
+#region button functions
+    private void onUpdateID(string arg0)
 	{
 		this.ParticipantId = arg0;
 
@@ -156,9 +157,7 @@ public class PreferanceMenu : MonoBehaviour {
         this.updateGameDataPref(newPref, this.ParticipantId);
 
         FileIO.writePrefFile(newPref);
-
-        gameObject.GetComponent<Canvas>().enabled = false;
-        MainMenuCanvas.enabled = true;
+;
         GameData.gamedata.translatedDictionary = FileIO.readLanguageFile(newPref.Language);
         GameObject.FindGameObjectWithTag("MainMenu").GetComponent<Menu>().assignNamesToButton();
 
@@ -173,7 +172,7 @@ public class PreferanceMenu : MonoBehaviour {
         MainMenuCanvas.enabled = true;
         
     }
-
+    #endregion
     //private void onPopulate()
     //{
     //    //FileIO.populateThemeFolder();

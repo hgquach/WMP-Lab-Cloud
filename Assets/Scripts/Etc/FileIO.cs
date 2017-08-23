@@ -231,7 +231,7 @@ public static class FileIO
         PreferanceStruct defaultPref = new PreferanceStruct();
         defaultPref.RoundLimit = 10;
         defaultPref.IsTimed = false;
-        defaultPref.SurveyQuestion = false;
+        defaultPref.SurveyQuestion = true;
         defaultPref.ThemeChange = 2;
         defaultPref.MaxError = 85;
         defaultPref.MinError = 65;
@@ -247,7 +247,7 @@ public static class FileIO
         PreferanceStruct defaultPref = new PreferanceStruct();
         defaultPref.RoundLimit = 3;
         defaultPref.IsTimed = false;
-        defaultPref.SurveyQuestion = false;
+        defaultPref.SurveyQuestion = true;
         defaultPref.ThemeChange = 2;
         defaultPref.MaxError = 85;
         defaultPref.MinError = 65;
@@ -260,8 +260,8 @@ public static class FileIO
     {
         string filepath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages", "English.txt"));
         string[] englishText = { "START", "DEMO", "NEXT", "GO!", "DONE", "MAIN MENU", "LEVEL","xxx % correct",
-        "Average Reaction Time: xxx seconds","Perfect Score Bonus: xxx","Points: xxx","How much did you like the game today?",
-        "I really liked the game", "the game was okay","I did not like the game","How hard did you try today?","I tried my best",
+        "Average Response Time: xxx seconds","Perfect Score Bonus: xxx","Points: xxx","How much did you like the game today?",
+        "I really liked the game", "'The game was okay","I did not like the game","How hard did you try today?","I tried my best",
         "I tried a little","I did not try","You got xxx points today!","You have xxx points so far!"};
 
         if (!File.Exists(filepath))

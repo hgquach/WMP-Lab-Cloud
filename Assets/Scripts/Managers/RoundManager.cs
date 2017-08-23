@@ -249,7 +249,7 @@ public class RoundManager : MonoBehaviour {
             bool restrictNotPass = true;
             do {
                 // see if we can do this with float values
-                Vector2 circlePos = Random.insideUnitCircle * (separation + 1f); 
+                Vector2 circlePos = Random.insideUnitCircle * (3.5f); 
                 Vector2 dotPos = new Vector2(circlePos.x + sideScale.x, circlePos.y + sideScale.y);
 
                 /**
@@ -263,7 +263,7 @@ public class RoundManager : MonoBehaviour {
                 {
                     GameObject spawnDot = Instantiate(dotTemplate, dotPos, transform.rotation) as GameObject;
                     spawnDot.SetActive(true);
-                    if(!_checkOverlap(spawnDot,this.dotLists ,side))
+                    if (!_checkOverlap(spawnDot, this.dotLists, side))
                     {
                         restrictNotPass = false;
                         int sideIndex = (side == Sides.Left && side != Sides.Null ? 0 : 1);
@@ -274,9 +274,9 @@ public class RoundManager : MonoBehaviour {
                     else
                     {
                         Destroy(spawnDot);
-                    
+
                     }
-                }
+            }
             }while ( restrictNotPass);
 
 
