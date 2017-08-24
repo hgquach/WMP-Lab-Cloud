@@ -11,6 +11,7 @@ public class Menu : MonoBehaviour
     private Canvas PreferenceMenu;
     public Text errorMessage;
 
+    public Text currentParticipantID;
     public Button PlayButton;
     public Button DemoButton;
 
@@ -20,7 +21,10 @@ public class Menu : MonoBehaviour
         PreferenceMenu = GameObject.FindGameObjectWithTag("PreferenceMenu").GetComponent<Canvas>();
     }
 
-
+    void Start()
+    {
+        updateCurrentParticipantID();
+    }
     void Update()
     {
        //Debug.Log(TL.ToString() + TR.ToString() + BL.ToString() + BR.ToString());
@@ -31,6 +35,7 @@ public class Menu : MonoBehaviour
             //Debug.Log("Secret Menu should open");
         }
     }
+
     public void playButton()
     {
        // Debug.Log(GameData.gamedata.haveLevels.ToString() + GameData.gamedata.haveThemes.ToString());
@@ -65,6 +70,11 @@ public class Menu : MonoBehaviour
 
         }
     }
+    public void updateCurrentParticipantID()
+    {
+        this.currentParticipantID.text = GameData.gamedata.currentParticipant.ID.ToString();
+    }
+
     public void TLPressedDown()
     {
         this.TL = true;
@@ -81,7 +91,6 @@ public class Menu : MonoBehaviour
     {
         this.BR = true;
     }
-
     public void TRPressedUp()
     {
         this.TL = false;    
@@ -108,7 +117,7 @@ public class Menu : MonoBehaviour
 
         return false;
     }
-
+    
     private IEnumerator displayError(string msg , float delay)
     {
         this.errorMessage.text = msg;
@@ -116,7 +125,7 @@ public class Menu : MonoBehaviour
         yield return new WaitForSeconds(delay);
         this.errorMessage.enabled = false;
     }
-     public void  assignNamesToButton()
+    public void  assignNamesToButton()
     {
         PlayButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["START"];
         DemoButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["DEMO"];

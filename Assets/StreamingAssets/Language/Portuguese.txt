@@ -1,5 +1,6 @@
 INÍCIO
 DEMO
+PRÓXIMO
 GO!
 FIM
 MENU PRINCIPAL
@@ -7,7 +8,7 @@ Nível
 xxx % correto
 Tempo de reação - média: xxx segundos
 Bônus para pontuação perfeita: xxx
-Pontos:xxx
+Pontos: xxx
 O quanto você gostou do jogo hoje?
 Eu gostei muito do jogo
 O jogo estava ok

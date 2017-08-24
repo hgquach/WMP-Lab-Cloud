@@ -25,8 +25,7 @@ public class GameData : MonoBehaviour {
 
             GameData.gamedata.haveLevels = false;
             GameData.gamedata.haveThemes = false;
-            //Dictionary<string, string> tempDict = FileIO.readStreamingAssetDirectory();
-            //FileIO.moveStreamingAssets(tempDict);
+
             this.checkAndCreateFolders();
             ////  FileIO.populateThemeFolder();
             ////FileIO.populateLevelFolder();

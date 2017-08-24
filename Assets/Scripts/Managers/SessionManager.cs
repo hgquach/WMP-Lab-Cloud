@@ -24,13 +24,13 @@ public class SessionManager : MonoBehaviour {
     [SerializeField]
     public float timeRoundstart;
     [SerializeField]
-    private int currentLevel , currentTheme,totalPointsInSess;
+    private int currentLevel;
+    private int currentTheme,totalPointsInSess;
     public ThemeStruct roundTheme;
     public LevelStruct roundLevel;
     public bool isLevelDisplay;
     void Awake()
     {
-
         if(GameData.gamedata.isDemo)
         {
             this.isTimedSession = false;
@@ -72,14 +72,18 @@ public class SessionManager : MonoBehaviour {
         if (roundManager.getRoundStart() && !this.isLevelDisplay)
         {
             //Debug.Log("new round");
-            if (this.currentRound % GameData.gamedata.SessionPreferance.ThemeChange == 0 && this.currentRound != 1)
+            if(this.currentRound != 1)
             {
-                this.currentTheme = this._themeChange(this.currentTheme, GameData.gamedata.sessionTheme.Count-1);
-
                 this.currentLevel = this.levelChange(GameData.gamedata.sessionLevels.Count,
                     this.currentLevel, roundManager.accuracySoFar, GameData.gamedata.SessionPreferance.MinError,
                     GameData.gamedata.SessionPreferance.MaxError);
+                if (this.currentRound % GameData.gamedata.SessionPreferance.ThemeChange == 0 && this.currentRound != 1)
+                {
+                    this.currentTheme = this._themeChange(this.currentTheme, GameData.gamedata.sessionTheme.Count-1);
+
+                }
             }
+
             Debug.Log("this is updated level: "+this.currentLevel);
             // adjust for zero based indexing
             this.roundLevel = GameData.gamedata.sessionLevels[this.currentLevel-1];
@@ -231,7 +235,7 @@ public class SessionManager : MonoBehaviour {
         GameData.gamedata.currentParticipant.Level = this.currentLevel;
         GameData.gamedata.currentParticipant.Theme = this.currentTheme;
         GameData.gamedata.currentParticipant.PointTotal += this.totalPointsInSess;
-        Debug.Log("current total: "+GameData.gamedata.currentParticipant.PointTotal);
+        //Debug.Log("current total: "+GameData.gamedata.currentParticipant.PointTotal);
         if (!GameData.gamedata.isDemo)
         {
             FileIO.writeParticipantFile(GameData.gamedata.currentParticipant);

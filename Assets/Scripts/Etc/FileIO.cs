@@ -261,7 +261,7 @@ public static class FileIO
         string filepath = Path.Combine(Application.persistentDataPath, Path.Combine("Languages", "English.txt"));
         string[] englishText = { "START", "DEMO", "NEXT", "GO!", "DONE", "MAIN MENU", "LEVEL","xxx % correct",
         "Average Response Time: xxx seconds","Perfect Score Bonus: xxx","Points: xxx","How much did you like the game today?",
-        "I really liked the game", "'The game was okay","I did not like the game","How hard did you try today?","I tried my best",
+        "I really liked the game", "The game was okay","I did not like the game","How hard did you try today?","I tried my best",
         "I tried a little","I did not try","You got xxx points today!","You have xxx points so far!"};
 
         if (!File.Exists(filepath))
@@ -484,138 +484,104 @@ public static class FileIO
     }
 
     // functions used to populate the language, theme , and level folder in file structure along with functions that used the WWW class to access streamming assets
-    //static public void moveStreamingAssets(Dictionary<string, string> assetDirectory)
-    //{
-    //    foreach (KeyValuePair<string, string> pair in assetDirectory)
-    //    {
+    static public void moveStreamingAssets(Dictionary<string, List<string>> assetDirectory)
+    {
+        string pathwaySrc, pathwayTrg;
+        foreach (KeyValuePair<string, List<string>> pair in assetDirectory)
+        {
+            foreach(string filename in pair.Value)
+            {
 
-    //        string pathwaySrc = Application.streamingAssetsPath + "/Background/" + pair.Key + "/" + pair.Value;
-    //        Debug.Log(pathwaySrc);
-    //        string pathwayTrg = FileIO.FILE_PATH_TO_THEME_FOLDER + @"/" + pair.Key.ToString() + @"/" + pair.Value.ToString();
-    //        pathwayTrg = pathwayTrg.Replace("\n", "").Replace("\r", "");
-    //        Debug.Log(pathwayTrg);
-    //        WWW reader = new WWW(pathwaySrc);
-    //        while (!reader.isDone) { }
-    //        if (!File.Exists(pathwayTrg))
-    //        {
-    //            if (pathwayTrg.Contains(".txt"))
-    //            {
-    //                File.Create(pathwayTrg);
-    //                File.WriteAllBytes(pathwayTrg, reader.bytes);
+                Debug.Log(filename);
 
-    //            }
+                switch(pair.Key)
+                {
+                    case "Level":
+                        pathwaySrc = Application.streamingAssetsPath+"/"+pair.Key+"/"+filename;
+                        pathwayTrg = FileIO.FILE_PATH_TO_LEVEL_FOLDER+"/"+filename;
+                        break;
+                    case "Language":
+                        pathwaySrc = Application.streamingAssetsPath + "/" + pair.Key + "/" + filename;
+                        pathwayTrg = FileIO.FILE_PATH_TO_LANGAUGE_FOLDER+"/"+filename;
+                        break;
+                    default:
+                        DirectoryInfo themeFolder = new DirectoryInfo(Path.Combine(FileIO.FILE_PATH_TO_THEME_FOLDER, pair.Key.ToString()));
+                        if(!themeFolder.Exists)
+                        {
+                            themeFolder.Create();
+                        }
+                        //string tempfilepath = Path.Combine(Application.streamingAssetsPath, filename );
+                        //Debug.Log(pair.Key + "," + filename);
+                        //Debug.Log(tempfilepath);
+                        //Debug.Log(Path.Combine(Application.streamingAssetsPath,tempfilepath));
+                        pathwaySrc = Application.streamingAssetsPath + "/" + "Background" + "/" + pair.Key + "/" + filename;
+                        pathwayTrg = FileIO.FILE_PATH_TO_THEME_FOLDER + "/" + pair.Key + "/" + filename;
+                        //pathwaySrc = Path.Combine(Application.streamingAssetsPath,Path.Combine("Background",Path.Combine(pair.Key,filename)));
+                        //pathwayTrg = Path.Combine(FileIO.FILE_PATH_TO_THEME_FOLDER, Path.Combine(pair.Key.ToString(), filename));
+                        break;
+                }
+                 Debug.Log(pathwaySrc);
+                 pathwayTrg = pathwayTrg.Replace("\n", "").Replace("\r", "");
+                 Debug.Log(pathwayTrg);
+                 WWW reader = new WWW(pathwaySrc);
+                 while (!reader.isDone) { }
+                 if (!File.Exists(pathwayTrg))
+                 {
+                    if (pathwayTrg.Contains(".txt"))
+                    {
+                        //File.Create(pathwayTrg);
+                        File.WriteAllBytes(pathwayTrg, reader.bytes);
 
-    //            if (pathwayTrg.Contains(".png"))
-    //            {
-    //                File.WriteAllBytes(pathwayTrg, reader.texture.EncodeToPNG());
-    //            }
+                    }
 
-    //            if(pathwayTrg.Contains(".jpg"))
-    //            {
-    //                Texture2D texture = new Texture2D(2,2);
-    //                reader.LoadImageIntoTexture(texture);
-    //                texture.EncodeToJPG();
-    //                File.WriteAllBytes(pathwayTrg, texture.EncodeToPNG());
-    //            }
-    //        }
-    //        reader.Dispose();
-    //    }
-    //}
+                    if (pathwayTrg.Contains(".png"))
+                    {
+                        File.WriteAllBytes(pathwayTrg, reader.texture.EncodeToPNG());
+                    }
 
-    //static public Dictionary<string, string> readStreamingAssetDirectory()
-    //{
-    //    Dictionary<string, string> fileDirectory = new Dictionary<string, string>();
-    //    string pathway = Path.Combine(Application.streamingAssetsPath, "directory.txt");
-    //    WWW reader = new WWW(pathway);
-    //    while (!reader.isDone) { }
-    //    string filecontent = reader.text.Trim();
-    //    string[] splitContent = filecontent.Split('\n');
+                    if (pathwayTrg.Contains(".jpg"))
+                    {
+                        File.WriteAllBytes(pathwayTrg, reader.texture.EncodeToJPG());
 
-    //    foreach (string s in splitContent)
-    //    {
-    //        string[] tempSplit = s.Split(',');
-    //        // Debug.Log(tempSplit[0] + "," + tempSplit[1]);
-    //        fileDirectory[tempSplit[0]] = tempSplit[1];
-    //    }
-    //    return fileDirectory;
+                    }
+                 }
+                 reader.Dispose();
 
-    //}
 
-    //static private IEnumerator readingDirectory()
-    //{
-    //    string pathway = Path.Combine(Application.streamingAssetsPath, "directory.txt");
-    //    WWW reader = new WWW(pathway);
-    //    yield return reader;
-    //    Debug.Log(reader.text);
+           }
 
-    //}
-    //static public void populateThemeFolder()
-    //{
-    //    string pathwayToDefaultTheme = Path.Combine(Application.streamingAssetsPath, "Background");
-    //    Debug.Log(pathwayToDefaultTheme);
-    //    if(pathwayToDefaultTheme.Contains(":///") )
-    //    {
-    //        if (File.Exists(pathwayToDefaultTheme))
-    //        {
-    //            Debug.Log("Streaming asset folder exist!");
-    //            WWW www = new WWW(pathwayToDefaultTheme);
-    //            Debug.Log("created www object");
-    //            while (!www.isDone) ;
-    //            Debug.Log("finsish streaming www");
-    //            if (string.IsNullOrEmpty(www.error))
-    //            {
-    //                Debug.Log("File exist and trying to write www to folder");
-    //                File.WriteAllBytes(FileIO.FILE_PATH_TO_THEME_FOLDER, www.bytes);
-    //            }
-    //            else
-    //            {
-    //                Debug.Log(www.error);
-    //            }
-    //        }
-    //    }
-    //    else
-    //    {
 
-    //        DirectoryCopy(pathwayToDefaultTheme,FileIO.FILE_PATH_TO_THEME_FOLDER);
-    //    }
-    //}
+        }
+    }
 
-    //static public void populateLevelFolder()
-    //{
-    //    string pathwayToDefaultLevel = Path.Combine(Application.streamingAssetsPath, "Level");
-    //    Debug.Log(pathwayToDefaultLevel);
-    //    if(pathwayToDefaultLevel.Contains("://") )
-    //    {
-    //        if (File.Exists(pathwayToDefaultLevel))
-    //        {
-    //            Debug.Log("Streaming asset folder exist!");
-    //            WWW www = new WWW(pathwayToDefaultLevel);
-    //            Debug.Log("created www object");
-    //            while (!www.isDone) ;
-    //            Debug.Log("finsish streaming www");
-    //            if (string.IsNullOrEmpty(www.error))
-    //            {
-    //                Debug.Log("File exist and trying to write www to folder");
-    //                File.WriteAllBytes(FileIO.FILE_PATH_TO_LEVEL_FOLDER, www.bytes);
-    //            }
-    //            else
-    //            {
-    //                Debug.Log(www.error);
-    //            }
-    //        }
-    //    }
-    //    else
-    //    {
+    static public Dictionary<string, List<string>> readStreamingAssetDirectory()
+    {
+        Dictionary<string, List<string>> fileDirectory = new Dictionary<string, List<string>>();
+        string pathway = Path.Combine(Application.streamingAssetsPath, "directory.txt");
+        WWW reader = new WWW(pathway);
+        while (!reader.isDone) { }
+        string filecontent = reader.text.Trim();
+        string[] splitContent = filecontent.Split('\n');
 
-    //        DirectoryCopy(pathwayToDefaultTheme,FileIO.FILE_PATH_TO_THEME_FOLDER);
-    //    }
-    //}
+        foreach (string s in splitContent)
+        {
+            string[] tempSplit = s.Split(',');
+            //Debug.Log(tempSplit[0] + "," + tempSplit[1]);
+           if(fileDirectory.ContainsKey(tempSplit[0]) )
+           {
+                string trimmedFilename = tempSplit[1].TrimEnd('\r', '\n').TrimStart('\r','\n');
+                fileDirectory[tempSplit[0]].Add(trimmedFilename);
 
-    //static public void populateLanguageFolder()
-    //{
-    //    string pathwayToDefaultLevel = Path.Combine(Application.dataPath, Path.Combine("Default", "Language"));
-    //    DirectoryCopy(pathwayToDefaultLevel, FileIO.FILE_PATH_TO_LANGAUGE_FOLDER);
-    //}
+           }
+           else
+           {
+                fileDirectory.Add(tempSplit[0], new List<string>());
+                fileDirectory[tempSplit[0]].Add(tempSplit[1]);
+           }
+        }
+        return fileDirectory;
+
+    }
 
     static public ParticipantStruct readParticipantFile(string filepathway)
     {

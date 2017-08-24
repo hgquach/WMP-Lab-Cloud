@@ -28,7 +28,7 @@ public class TextUpdate : MonoBehaviour {
             percentCorrect = GameData.gamedata.translatedDictionary["correct"].Replace("xxx",((accuracy * 100).ToString("F0")));
             averageReactionTime = GameData.gamedata.translatedDictionary["AvgReact"].Replace("xxx",avgReactionTime.ToString("F1"));
             pointsEarned = GameData.gamedata.translatedDictionary["Points"].Replace("xxx",points.ToString());
-            this.informationText.text = percentCorrect + "\n" + averageReactionTime + "\n" + pointsEarned;
+            this.informationText.text = percentCorrect + "\n" + averageReactionTime + "\n\n" + pointsEarned;
         }
         else
         {
@@ -55,7 +55,7 @@ public class TextUpdate : MonoBehaviour {
        // pointsSoFar = pointsSoFar.Replace("xxx", grandtotal.ToString());
 
         this.informationText.fontSize = 45;
-        this.informationText.text = pointsToday +"\n"+ pointsSoFar ; 
+        this.informationText.text = pointsToday +"\n\n"+ pointsSoFar ; 
     }
 
     public void displayText()

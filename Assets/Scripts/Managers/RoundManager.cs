@@ -97,7 +97,6 @@ public class RoundManager : MonoBehaviour {
 		return this.readyForUser;
 	}
 
-	// use to set some of the mananger parameter 
 	public void setTrialMax (int max)
 	{
 		this.trialMax = max;
@@ -389,6 +388,7 @@ public class RoundManager : MonoBehaviour {
         this.recordingmanager.StopRecording();
         this.clearTrialScreen();
         yield return new WaitForSecondsRealtime(.5f);
+        this.sceneController.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["NEXT"];
 		if (checkAnswer (this.CorrectAnswer, this.userChoice)) {
             this.incCorrectSoFar();
 			GameObject result = Resources.Load ("correct1") as GameObject;
@@ -520,7 +520,7 @@ public class RoundManager : MonoBehaviour {
             {
         
                 float printDist = Vector2.Distance(dotPos,checkDotPos);
-                Debug.Log("this is the desired seperation: " + distance + " this is the distance a dot: " + printDist);
+               // Debug.Log("this is the desired seperation: " + distance + " this is the distance a dot: " + printDist);
                 if (distance > Vector2.Distance(dotPos, checkDotPos))
                 {
                    print("not far enough");

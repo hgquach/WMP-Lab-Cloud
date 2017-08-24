@@ -8,7 +8,7 @@ public class PreferanceMenu : MonoBehaviour {
 #region class public and private variables 
     public InputField Participant, LimitField , ThemeChangeField, MaxError,MinError, TrialPerRd;
     public Toggle RoundField , TimedField, SurveyField;
-    public Button ApplyButton,ExitButton;
+    public Button ApplyButton,ExitButton,PopulateButton;
     public Dropdown languageDropDown;
 
     private string ParticipantId,selectedLanguage;
@@ -169,18 +169,20 @@ public class PreferanceMenu : MonoBehaviour {
     private void onExit()
     {
         gameObject.GetComponent<Canvas>().enabled = false;
+        MainMenuCanvas.GetComponent<Menu>().updateCurrentParticipantID();
         MainMenuCanvas.enabled = true;
         
     }
+
+    private void onPopulate()
+    {
+        Dictionary<string, List<string>> tempDict = FileIO.readStreamingAssetDirectory();
+        FileIO.moveStreamingAssets(tempDict);
+        GameData.gamedata.sessionLevels = FileIO.returnLevelInFolder();
+        GameData.gamedata.sessionTheme = FileIO.searchandFilterForThemeFolder();
+        GameData.gamedata.translatedDictionary = FileIO.readLanguageFile("English");
+    }
     #endregion
-    //private void onPopulate()
-    //{
-    //    //FileIO.populateThemeFolder();
-    //    //FileIO.populateLevelFolder();
-    //    //GameData.gamedata.sessionLevels = FileIO.returnLevelInFolder();
-    //    //GameData.gamedata.sessionTheme = FileIO.searchandFilterForThemeFolder();
-    //    //GameData.gamedata.translatedDictionary = FileIO.readLanguageFile("English");
-    //}
 
     private void Assignment()
     {
@@ -257,7 +259,7 @@ public class PreferanceMenu : MonoBehaviour {
         TrialPerRd.onValueChanged.AddListener(onUpdatetrialPerRd);
         ApplyButton.onClick.AddListener(onSave);
         ExitButton.onClick.AddListener(onExit);
-        //Populate.onClick.AddListener(onPopulate);
+        PopulateButton.onClick.AddListener(onPopulate);
         this.languageDropDown.onValueChanged.AddListener(onUpdateLanguage);
     }
 
