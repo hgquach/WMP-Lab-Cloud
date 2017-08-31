@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
  */
 public struct ThemeStruct
 {
-    public string levelName,dotShape;
+    public string themename,dotShape;
     public string backgroundImage;
     public List<Color> dotColorRange;
     public Color UIColor;
@@ -17,7 +17,7 @@ public struct ThemeStruct
     public ThemeStruct(string name , string shape , List<Color> colorRange, Color color, string bgImg = "none")
     {
         this.backgroundImage = bgImg;
-        this.levelName = name;
+        this.themename = name;
         this.dotShape = shape;
         this.dotColorRange = colorRange;
         this.UIColor = color;

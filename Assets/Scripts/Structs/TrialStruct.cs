@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 public struct TrialStruct
 {
-    public string TaskName, PartcipantId, Theme,Response,GameVersion,OSSystem,accuracy
-        ,ScreenReso,Date,Time,Dot,Background,Answer;
+    public string TaskName, PartcipantId,Response,GameVersion,OSSystem,accuracy
+        ,ScreenReso,Date,Time,Dot,Theme,Answer;
     public int RoundNumber, Level,Point, sizeLeftCloud , sizeRightCloud,RoundLimit,TimeLimit,Session,EffortReponse,DifficultyReponse,TrialNumber;
     public float ReactionTime,TimeElasped;
     public Color color;
@@ -20,7 +20,6 @@ public struct TrialStruct
         this.TaskName = TaskName;
         this.PartcipantId = PartcipantId;
         this.Session = Session;
-        this.Theme = Theme;
         this.Response = Response;
         this.GameVersion = GameVersion;
         this.ScreenReso = Screen;
@@ -43,7 +42,7 @@ public struct TrialStruct
         this.TrialNumber = trial;
         this.Point = point;
         this.TimeLimit = timelimit;
-        this.Background = background;
+        this.Theme = background;
     }
 
     public override string ToString()
@@ -60,7 +59,7 @@ public struct TrialStruct
         string[] TrialStringArray = { this.TaskName,GameVersion,OSSystem,this.ScreenReso,this.PartcipantId
         ,this.Date,this.Time,this.Session.ToString(),this.Level.ToString(),this.RoundNumber.ToString(),this.TrialNumber.ToString()
         , this.accuracy.ToString() ,this.Answer, this.ReactionTime.ToString(),this.Point.ToString(),this.Response,this.sizeLeftCloud.ToString()
-        ,this.sizeRightCloud.ToString(),this.Dot,this.Background,strRoundLimit,strTimeLimit
+        ,this.sizeRightCloud.ToString(),this.Dot,this.Theme,strRoundLimit,strTimeLimit
         ,this.TimeElasped.ToString("F2"),strDReponse,strEReponse};
 
         return string.Join(",", TrialStringArray);

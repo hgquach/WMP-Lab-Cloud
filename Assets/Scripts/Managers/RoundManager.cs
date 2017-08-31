@@ -183,7 +183,7 @@ public class RoundManager : MonoBehaviour {
             this.dotTemplate = new GameObject("dot");
             GameObject dotSprite = new GameObject("sprite");
             this.dotTemplate.AddComponent<PolygonCollider2D>();
-            dotSprite.AddComponent<SpriteRenderer>().sprite = FileIO.returnSpriteInfolder(sessionManager.roundTheme.levelName,"stimuli");
+            dotSprite.AddComponent<SpriteRenderer>().sprite = FileIO.returnSpriteInfolder(sessionManager.roundTheme.themename,"stimuli");
             dotSprite.GetComponent<SpriteRenderer>().color = this.dotColor;
             dotSprite.transform.SetParent(this.dotTemplate.transform);
             this.dotTemplate.transform.localScale = new Vector3(.0625f, .0625f, 1);
@@ -326,31 +326,52 @@ public class RoundManager : MonoBehaviour {
 		return false;
 	}
 
-	private RatioStruct _dotPerSide(RatioStruct ratio,  int totalDots, int min =1)
+	private RatioStruct _dotPerSide(RatioStruct ratio,  int totalDots)
 	{
 		RatioStruct dotPerSide = new RatioStruct(); 
-		int cloud1Ratio = ratio.cloud1;
-		int cloud2Ratio = ratio.cloud2; 
-		int cloudDot = 0;
-		int total = totalDots;
-		int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,total);
+        int cloud1Dot , cloud2Dot;
+        int ratioGCD = _genericGCD(ratio.cloud1, ratio.cloud2);
+		int cloud1Ratio = Mathf.FloorToInt(ratio.cloud1 / ratioGCD);
+		int cloud2Ratio = Mathf.FloorToInt(ratio.cloud2 / ratioGCD);
 		int leftOrRight = Random.Range (1, 3);
 
-// 			Debug.Log (leftOrRight);
-		do {
-			cloudDot = Random.Range (min, largestDot + 1);
-		} while(!_isRatioInParameters (cloudDot, cloud1Ratio, cloud2Ratio, total));
+        Debug.Log("this is the cloud1 ratio: " + cloud1Ratio + " this is the cloud2 ratio: " + cloud2Ratio);
+        // double x approach 
+        int dot1 = 0, dot2 = 0;
+        if((cloud1Ratio + cloud2Ratio) > totalDots || _LargestRatio(cloud1Ratio , cloud2Ratio , totalDots) < 3 )
+        {
+            do
+            {
+                dot1 = Random.Range(1, totalDots);
+                dot2 = Random.Range(1, totalDots);
+            }
+            while (_ApproxRatio(dot1,dot2,cloud1Ratio,cloud2Ratio));
+            cloud1Dot = dot1;
+            cloud2Dot = dot2;
+        }
+        else
+        {
+            // single x approach
+            int cloudDot = 0;
+            int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,totalDots);
+            do {
+                cloudDot = Random.Range (1, largestDot );
+            } while(!_isRatioInParameters (cloudDot, cloud1Ratio, cloud2Ratio, totalDots));
+
+            cloud1Dot = Mathf.FloorToInt(cloudDot * cloud1Ratio); 
+            cloud2Dot = Mathf.FloorToInt(cloudDot * cloud2Ratio);
+        }
 
 
-		switch (leftOrRight) 
+        switch (leftOrRight) 
 		{
 			case 1: 
-				dotPerSide.cloud1 = Mathf.FloorToInt(cloudDot * cloud1Ratio);
-				dotPerSide.cloud2 = Mathf.FloorToInt(cloudDot * cloud2Ratio);
+				dotPerSide.cloud1 = cloud1Dot;
+                dotPerSide.cloud2 = cloud2Dot;
 				break;
 			case 2:
-				dotPerSide.cloud2 = Mathf.FloorToInt (cloudDot * cloud1Ratio);
-				dotPerSide.cloud1 = Mathf.FloorToInt (cloudDot * cloud2Ratio);
+				dotPerSide.cloud2 = cloud1Dot;
+				dotPerSide.cloud1 = cloud2Dot;
 				break;
 			case 3:
 				Debug.Log ("you messed up");
@@ -377,12 +398,36 @@ public class RoundManager : MonoBehaviour {
 
 	}
 
-	private int _LargestRatio(int ratio1 , int ratio2 , int totalDot)
-	{
-		return  Mathf.FloorToInt (totalDot / (ratio1 + ratio2)); 
-	}
+    private bool _ApproxRatio(int cloudDot1 , int cloudDot2, int ratio1 ,int ratio2 , float approx = 0.05f)
+    {
+        return _IsApproxFloat((cloudDot1 / cloudDot2), (ratio1 / ratio2) , approx);
+    }
 
-	public IEnumerator displayResult()
+    private bool _IsApproxFloat(float a , float b , float tolerance = 0.05f)
+    {
+        return Mathf.Abs(a - b) < tolerance; 
+    }
+
+    private int _genericGCD(int value1, int value2)
+    {
+        if (value1 == 0)
+            return value2;
+        if (value2 == 0)
+            return value1;
+
+        if (value1 > value2)
+            return _genericGCD(value1 % value2, value2);
+        else
+            return _genericGCD(value1, value2 % value1);
+    }
+
+    private int _LargestRatio(int ratio1, int ratio2, int totalDot)
+    {
+        // calculate the largest possible dot amount one side can have but still maintain the ratio
+        return Mathf.FloorToInt(totalDot / (ratio1 + ratio2));
+    }
+
+    public IEnumerator displayResult()
 	{
 		this.readyForUser = false;
         this.recordingmanager.StopRecording();

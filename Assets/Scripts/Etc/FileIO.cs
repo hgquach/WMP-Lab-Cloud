@@ -609,21 +609,6 @@ public static class FileIO
     {
         List<LevelStruct> levelList = new List<LevelStruct>();
         string line;
-        //Debug.Log("Loading file");
-        //TextAsset levelFile= Resources.Load(filename) as TextAsset;
-        //string[] splitLevelFile = levelFile.text.Split("\n"[0]);
-        //foreach(string levelInfo in splitLevelFile)
-        //{
-        //    if(lineNum != 0)
-        //    {
-        //        LevelStruct level;
-        //        string[] individualLevelInfo = levelInfo.Split(","[0]);
-        //        RatioStruct levelRatio = new RatioStruct(int.Parse(individualLevelInfo[3].Split('/')[0]), int.Parse(individualLevelInfo[3].Split('/')[1]));
-        //        level = new LevelStruct(int.Parse(individualLevelInfo[0]), int.Parse(individualLevelInfo[1]), int.Parse(individualLevelInfo[2]), levelRatio);
-        //        levelList.Add(level);
-        //    }
-        //    lineNum++;
-        //}
         try
         {
             StreamReader reader = new StreamReader(filename);
@@ -638,7 +623,7 @@ public static class FileIO
                         LevelStruct level;
                       //  Debug.Log("this is the level line: " + line);
                         string[] levelInfo = line.Split(new[] { ',' },System.StringSplitOptions.RemoveEmptyEntries);
-                       // Debug.Log("this is the levels ratio" + levelInfo[3]);
+                        //Debug.Log("this is the levels ratio" + levelInfo[3]);
                         RatioStruct levelRatio = new RatioStruct(int.Parse(levelInfo[3].Split('/')[0]), int.Parse(levelInfo[3].Split('/')[1]));
                         level = new LevelStruct(int.Parse(levelInfo[0]), int.Parse(levelInfo[1]), float.Parse(levelInfo[2]), levelRatio);
                         levelList.Add(level);
@@ -810,7 +795,7 @@ public static class FileIO
                 {
                     writer.WriteLine("Task Name , Task Version , OS Information , Screen Resolution, ParticipantID, Date When Game Started," +
                         "Time When Game Started, Session,Level, Round Number, Trial Number, Accuracy,Correct Answer, Reaction Time, Points Won,Response(R/L)," +
-                        "Num Of Elements in Cloud 1 , Num Of Elements in Cloud 2, Element sprite, Background,Total Number of Round,Total Play Time , Session Time," +
+                        "Num Of Elements in Cloud 1 , Num Of Elements in Cloud 2, Element sprite, Theme,Total Number of Round,Total Play Time , Session Time," +
                         "Difficulty, Effort");
                 }
             }

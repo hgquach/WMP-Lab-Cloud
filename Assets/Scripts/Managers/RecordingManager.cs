@@ -38,14 +38,13 @@ public class RecordingManager : MonoBehaviour
         GameData.gamedata.trialData.Time = System.DateTime.Now.ToString("h:mm:ss");
         GameData.gamedata.trialData.TrialNumber = roundmanager.getCurrentTrial();
         GameData.gamedata.trialData.Dot = sessionmanager.roundTheme.dotShape;
-        GameData.gamedata.trialData.Theme = sessionmanager.roundTheme.levelName;
+        GameData.gamedata.trialData.Theme = sessionmanager.roundTheme.themename;
         GameData.gamedata.trialData.Response = roundmanager.userChoice.ToString();
         GameData.gamedata.trialData.sizeLeftCloud = roundmanager.dotPerSide.cloud1;
         GameData.gamedata.trialData.sizeRightCloud = roundmanager.dotPerSide.cloud2;
         GameData.gamedata.trialData.color = roundmanager.dotColor;
         GameData.gamedata.trialData.OSSystem = SystemInfo.operatingSystem;
         GameData.gamedata.trialData.GameVersion = Application.version;
-        GameData.gamedata.trialData.Background = sessionmanager.roundTheme.backgroundImage;
     }
 
     public void StopRecording()

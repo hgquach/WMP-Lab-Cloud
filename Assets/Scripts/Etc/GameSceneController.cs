@@ -108,7 +108,7 @@ public class GameSceneController : MonoBehaviour {
         this.roundmanager = roundManagerObject.GetComponent<RoundManager>();
         this.sessionmanager = sessionManagerObject.GetComponent<SessionManager>();
         this.mainCanvas = gameObject.GetComponent<Canvas>();
-        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["GO"];
+        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["GO!"];
 
     }
 }
