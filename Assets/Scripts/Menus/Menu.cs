@@ -118,7 +118,7 @@ public class Menu : MonoBehaviour
         return false;
     }
     
-    private IEnumerator displayError(string msg , float delay)
+    public IEnumerator displayError(string msg , float delay)
     {
         this.errorMessage.text = msg;
         this.errorMessage.enabled = true;

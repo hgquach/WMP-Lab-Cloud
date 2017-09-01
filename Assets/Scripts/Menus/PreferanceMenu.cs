@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
 using System.IO;
+using System.Linq;
 
 public class PreferanceMenu : MonoBehaviour {
 #region class public and private variables 
@@ -157,13 +158,8 @@ public class PreferanceMenu : MonoBehaviour {
         this.updateGameDataPref(newPref, this.ParticipantId);
 
         FileIO.writePrefFile(newPref);
-;
         GameData.gamedata.translatedDictionary = FileIO.readLanguageFile(newPref.Language);
         GameObject.FindGameObjectWithTag("MainMenu").GetComponent<Menu>().assignNamesToButton();
-
-
-
-
     }
 
     private void onExit()
@@ -181,6 +177,9 @@ public class PreferanceMenu : MonoBehaviour {
         GameData.gamedata.sessionLevels = FileIO.returnLevelInFolder();
         GameData.gamedata.sessionTheme = FileIO.searchandFilterForThemeFolder();
         GameData.gamedata.translatedDictionary = FileIO.readLanguageFile("English");
+        Assignment();
+        
+
     }
     #endregion
 
@@ -190,9 +189,11 @@ public class PreferanceMenu : MonoBehaviour {
         MainMenuCanvas = GameObject.FindGameObjectWithTag("MainMenu").GetComponent<Canvas>();
         //Debug.Log("do we have a current participant?: "+GameData.gamedata.haveCurrentParticipant);
         this.avaiableLanguage = FileIO.searchandFilterForLanguageFile();
-        this.avaiableLanguage.Insert(0,"Select Language...");
-        this.languageDropDown.AddOptions(this.avaiableLanguage);
+        this.avaiableLanguage.Insert(0, "Select Language...");
+        this.avaiableLanguage = this.avaiableLanguage.Distinct().ToList();
 
+        this.languageDropDown.ClearOptions();
+        this.languageDropDown.AddOptions(this.avaiableLanguage);
        if(!GameData.gamedata.haveCurrentParticipant)
         {
             this.Participant.text = "999";

@@ -340,18 +340,20 @@ public class RoundManager : MonoBehaviour {
         int dot1 = 0, dot2 = 0;
         if((cloud1Ratio + cloud2Ratio) > totalDots || _LargestRatio(cloud1Ratio , cloud2Ratio , totalDots) < 3 )
         {
+            Debug.Log("double x approach");
             do
             {
                 dot1 = Random.Range(1, totalDots);
                 dot2 = Random.Range(1, totalDots);
             }
-            while (_ApproxRatio(dot1,dot2,cloud1Ratio,cloud2Ratio));
+            while (!_ApproxRatio(dot1,dot2,cloud1Ratio,cloud2Ratio));
             cloud1Dot = dot1;
             cloud2Dot = dot2;
         }
         else
         {
             // single x approach
+            Debug.Log("single x approach");
             int cloudDot = 0;
             int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,totalDots);
             do {
@@ -361,7 +363,7 @@ public class RoundManager : MonoBehaviour {
             cloud1Dot = Mathf.FloorToInt(cloudDot * cloud1Ratio); 
             cloud2Dot = Mathf.FloorToInt(cloudDot * cloud2Ratio);
         }
-
+        Debug.LogFormat("right side dot count: {0} left side dot count: {1}", cloud1Dot, cloud2Dot);
 
         switch (leftOrRight) 
 		{
@@ -400,11 +402,13 @@ public class RoundManager : MonoBehaviour {
 
     private bool _ApproxRatio(int cloudDot1 , int cloudDot2, int ratio1 ,int ratio2 , float approx = 0.05f)
     {
-        return _IsApproxFloat((cloudDot1 / cloudDot2), (ratio1 / ratio2) , approx);
+        Debug.LogFormat("cloudDot1 {0}  cloudDot2 {1}",cloudDot1,cloudDot2);
+        return _IsApproxFloat(((float)cloudDot1 / (float)cloudDot2), ((float)ratio1 / (float)ratio2), approx);
     }
 
     private bool _IsApproxFloat(float a , float b , float tolerance = 0.05f)
     {
+        Debug.LogFormat(" cloud dot ratio is {0} and desired ratio is {1}", a, b);
         return Mathf.Abs(a - b) < tolerance; 
     }
 
