@@ -72,6 +72,7 @@ public class Menu : MonoBehaviour
     }
     public void updateCurrentParticipantID()
     {
+        Debug.Log(GameData.gamedata.currentParticipant.ID.ToString());
         this.currentParticipantID.text = GameData.gamedata.currentParticipant.ID.ToString();
     }
 

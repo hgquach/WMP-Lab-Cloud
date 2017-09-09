@@ -64,6 +64,11 @@ public class SessionManager : MonoBehaviour {
         }
 
         this.timeRoundstart = Time.time;
+        foreach (string theme in GameData.gamedata.sessionTheme)
+        {
+            ThemeStruct i = FileIO.returnThemeInFolder(theme);
+            Debug.Log(i.themename);
+        }
     }
 
     void Update()
@@ -84,7 +89,6 @@ public class SessionManager : MonoBehaviour {
                 }
             }
 
-            Debug.Log("this is updated level: "+this.currentLevel);
             // adjust for zero based indexing
             this.roundLevel = GameData.gamedata.sessionLevels[this.currentLevel-1];
             this.roundTheme = FileIO.returnThemeInFolder((string)GameData.gamedata.sessionTheme[this.currentTheme]);
@@ -158,7 +162,7 @@ public class SessionManager : MonoBehaviour {
         {
             LevelStruct tempLevel = currentLevel;
             ThemeStruct tempTheme = roundTheme;
-            Debug.Log("level spread: "+tempLevel.spread);
+            Debug.Log("current theme name: "+tempTheme.themename);
             this._UpdateRound(tempLevel.ratio, tempTheme.returnRandomColor(), GameData.gamedata.SessionPreferance.trialsPerRd, tempTheme.dotShape
                 , tempLevel.dotMax, tempLevel.spread);
             StartCoroutine(this.waitDisplay(tempLevel.levelNum));

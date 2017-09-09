@@ -4,7 +4,6 @@ using UnityEngine;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Text;
-
 public static class FileIO
 {
     static public string FILE_PATH_TO_MAIN_PREFERENCE = Path.Combine(Application.persistentDataPath , Path.Combine("Preferences" ,"Preference.csv"));
@@ -188,7 +187,7 @@ public static class FileIO
 
     static public void writeParticipantFile(ParticipantStruct participant ,bool isDemo = false)
     {
-        Debug.Log("writing to participant file");
+        //Debug.Log("writing to participant file");
         string filepath;
         if(isDemo)
         {
@@ -210,7 +209,7 @@ public static class FileIO
 
     static public void writeCurrentParticipant(string participantID)
     {
-        Debug.Log("writing to the current participant file");
+        //Debug.Log("writing to the current participant file");
         StreamWriter writer;
         string filePath = Path.Combine(Application.persistentDataPath, Path.Combine("Participants", "CurrentParticipant"+".txt"));
         using (writer = new StreamWriter(filePath, false))
@@ -229,13 +228,13 @@ public static class FileIO
     static public void writeDefaultPreferenceFile()
     {
         PreferanceStruct defaultPref = new PreferanceStruct();
-        defaultPref.RoundLimit = 10;
+        defaultPref.RoundLimit = 8;
         defaultPref.IsTimed = false;
         defaultPref.SurveyQuestion = true;
         defaultPref.ThemeChange = 2;
         defaultPref.MaxError = 85;
         defaultPref.MinError = 65;
-        defaultPref.trialsPerRd = 25;
+        defaultPref.trialsPerRd = 10;
         defaultPref.Language = "English";
         writePrefFile(defaultPref,false);
 
@@ -298,19 +297,21 @@ public static class FileIO
         ArrayList themeFolders = new ArrayList();
         DirectoryInfo RootThemeFolder = new DirectoryInfo(FileIO.FILE_PATH_TO_THEME_FOLDER);
         DirectoryInfo[] allThemeFolder = RootThemeFolder.GetDirectories();
+        IComparer comparison = new ThemeNameComparison();
         if (RootThemeFolder.Exists)
         {
             foreach (DirectoryInfo dir in allThemeFolder)
             {
                 if (searchAndCheckAllThemeFolder(dir.FullName))
                 {
-                   //Debug.Log(dir.Name);
                    themeFolders.Add(dir.Name);
                 }
 
             }
         }
+        themeFolders.Sort(comparison);
         GameData.gamedata.haveThemes = themeFolders.Count > 0 ? true : false;
+
         return themeFolders;
     }
 
@@ -592,7 +593,7 @@ public static class FileIO
             do
             {
                 line = reader.ReadLine();
-                Debug.Log(line);
+
                 if(line != null && !line.Contains("ID") && !line.Contains("***"))
                 {
                     line = line.Replace("/r", "").Replace("/n", "");

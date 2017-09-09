@@ -47,12 +47,14 @@ public class GameSceneController : MonoBehaviour {
 
     public void assignContinueLevel()
     {
+        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["GO!"];
         goButton.onClick.RemoveAllListeners();
         goButton.onClick.AddListener(continueLevel);
     }
 
     public void assignContinueAfterSmiley()
     {
+        goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["NEXT"];
         goButton.onClick.RemoveAllListeners();
         goButton.onClick.AddListener(continueAfterSmiley);
     }
@@ -108,7 +110,5 @@ public class GameSceneController : MonoBehaviour {
         this.roundmanager = roundManagerObject.GetComponent<RoundManager>();
         this.sessionmanager = sessionManagerObject.GetComponent<SessionManager>();
         this.mainCanvas = gameObject.GetComponent<Canvas>();
-        this.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["GO!"];
-
     }
 }

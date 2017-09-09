@@ -120,7 +120,7 @@ public class PreferanceMenu : MonoBehaviour {
     {
 
        // string preferanceFilePathway = Path.Combine(Application.persistentDataPath, Path.Combine("Preferences","Preference"+".csv"));
-        Debug.Log("this is the current participant id: "+this.ParticipantId); 
+        //Debug.Log("this is the current participant id: "+this.ParticipantId); 
         PreferanceStruct newPref = new PreferanceStruct();
         string currentParticipantID = FileIO.readCurrentParticipant();
         if (!this.ParticipantId.Equals(currentParticipantID) || currentParticipantID == "")
@@ -134,6 +134,8 @@ public class PreferanceMenu : MonoBehaviour {
             {
                 ParticipantStruct participant = new ParticipantStruct(int.Parse(this.ParticipantId),0,0,0,0);
                 FileIO.writeParticipantFile(participant);
+                GameData.gamedata.currentParticipant = participant; 
+
             }
 
             FileIO.writeCurrentParticipant(this.ParticipantId);
@@ -165,8 +167,9 @@ public class PreferanceMenu : MonoBehaviour {
     private void onExit()
     {
         gameObject.GetComponent<Canvas>().enabled = false;
-        MainMenuCanvas.GetComponent<Menu>().updateCurrentParticipantID();
         MainMenuCanvas.enabled = true;
+        MainMenuCanvas.GetComponent<Menu>().updateCurrentParticipantID();
+
         
     }
 

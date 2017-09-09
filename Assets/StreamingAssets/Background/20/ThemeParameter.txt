@@ -1,0 +1,3 @@
+ThemeName,Shape,ColorRange,BackGroundImage,UITextColor
+20,cross,(0,1,1,1/1,1,1,1/0,1,0,1),background,(0,1,1)
+

@@ -335,12 +335,10 @@ public class RoundManager : MonoBehaviour {
 		int cloud2Ratio = Mathf.FloorToInt(ratio.cloud2 / ratioGCD);
 		int leftOrRight = Random.Range (1, 3);
 
-        Debug.Log("this is the cloud1 ratio: " + cloud1Ratio + " this is the cloud2 ratio: " + cloud2Ratio);
         // double x approach 
         int dot1 = 0, dot2 = 0;
         if((cloud1Ratio + cloud2Ratio) > totalDots || _LargestRatio(cloud1Ratio , cloud2Ratio , totalDots) < 3 )
         {
-            Debug.Log("double x approach");
             do
             {
                 dot1 = Random.Range(1, totalDots);
@@ -353,7 +351,6 @@ public class RoundManager : MonoBehaviour {
         else
         {
             // single x approach
-            Debug.Log("single x approach");
             int cloudDot = 0;
             int largestDot = _LargestRatio(cloud1Ratio,cloud2Ratio,totalDots);
             do {
@@ -402,13 +399,11 @@ public class RoundManager : MonoBehaviour {
 
     private bool _ApproxRatio(int cloudDot1 , int cloudDot2, int ratio1 ,int ratio2 , float approx = 0.05f)
     {
-        Debug.LogFormat("cloudDot1 {0}  cloudDot2 {1}",cloudDot1,cloudDot2);
         return _IsApproxFloat(((float)cloudDot1 / (float)cloudDot2), ((float)ratio1 / (float)ratio2), approx);
     }
 
     private bool _IsApproxFloat(float a , float b , float tolerance = 0.05f)
     {
-        Debug.LogFormat(" cloud dot ratio is {0} and desired ratio is {1}", a, b);
         return Mathf.Abs(a - b) < tolerance; 
     }
 
@@ -437,7 +432,6 @@ public class RoundManager : MonoBehaviour {
         this.recordingmanager.StopRecording();
         this.clearTrialScreen();
         yield return new WaitForSecondsRealtime(.5f);
-        this.sceneController.goButton.GetComponentInChildren<Text>().text = GameData.gamedata.translatedDictionary["NEXT"];
 		if (checkAnswer (this.CorrectAnswer, this.userChoice)) {
             this.incCorrectSoFar();
 			GameObject result = Resources.Load ("correct1") as GameObject;
